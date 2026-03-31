@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,15 +6,17 @@ import { CheckCircle2, CreditCard, Landmark, Lock, Shield, Calendar } from "luci
 import paymentImg from "@/assets/payment-woman.jpg";
 import authCardImg from "@/assets/auth-card-woman.jpg";
 import authBankImg from "@/assets/auth-bank-man.jpg";
+import { useAuth } from "@/contexts/AuthContext";
 
-const plans = [
-  { months: 3, monthly: 1166.667, interest: "0% Interest", total: 3500, apr: "" },
-  { months: 6, monthly: 583.333, interest: "0% Interest", total: 3500, apr: "", popular: true },
-  { months: 12, monthly: 306.25, interest: "5% Interest APR", total: 3675, apr: "5%" },
+const fallbackPlans = [
+  { months: 3, monthly: 40000, total: 120000, interest: "0% Interest", popular: false },
+  { months: 6, monthly: 21000, total: 126000, interest: "5% Interest", popular: true },
+  { months: 12, monthly: 11200, total: 134400, interest: "12% Interest", popular: false },
 ];
 
 const PaymentPlans = () => {
   const navigate = useNavigate();
+  const { user: authUser } = useAuth();
   const [step, setStep] = useState(1);
   const [selected, setSelected] = useState(0);
   const [payMethod, setPayMethod] = useState<"card" | "bank">("card");
@@ -22,8 +24,30 @@ const PaymentPlans = () => {
   const [expiry, setExpiry] = useState("");
   const [cvc, setCvc] = useState("");
   const [loading, setLoading] = useState(false);
+  const [plans, setPlans] = useState<any[]>(fallbackPlans);
+  const [loadingPlans, setLoadingPlans] = useState(false);
 
-  const plan = plans[selected];
+  useEffect(() => {
+    if (!authUser) return;
+    setLoadingPlans(true);
+    fetch(`/api/paymentPlans?patientId=${authUser._id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setPlans(data.map((p: any) => ({
+            months: p.installments || p.months || 6,
+            monthly: Math.round((p.totalAmount || p.total || 0) / (p.installments || p.months || 6)),
+            total: p.totalAmount || p.total || 0,
+            interest: p.interest || "0% Interest",
+            popular: p.popular || false,
+          })));
+        }
+      })
+      .catch(() => { /* keep fallback plans */ })
+      .finally(() => setLoadingPlans(false));
+  }, [authUser]);
+
+  const plan = plans[selected] || {};
 
   const handleContinue = () => setStep(2);
 
@@ -63,46 +87,52 @@ const PaymentPlans = () => {
       <div className="max-w-5xl">
         <StepIndicator />
         <h1 className="text-2xl font-bold text-foreground mb-1">Choose a Payment Plan</h1>
-        <p className="text-muted-foreground mb-8">Split your $3,500 bill from Memorial General Hospital.</p>
+        <p className="text-muted-foreground mb-8">Split your bill into affordable payments.</p>
         <div className="grid lg:grid-cols-2 gap-8">
           <div className="space-y-4">
-            {plans.map((p, i) => (
-              <button
-                key={p.months}
-                onClick={() => setSelected(i)}
-                className={`w-full text-left p-5 sm:p-6 rounded-2xl border-2 transition-all relative ${
-                  selected === i
-                    ? "border-primary bg-secondary/50 shadow-card-hover"
-                    : "border-border bg-card hover:border-primary/30"
-                }`}
-              >
-                {p.popular && (
-                  <span className="absolute -top-2 right-4 bg-primary text-primary-foreground text-[10px] font-bold px-3 py-0.5 rounded-full">POPULAR</span>
-                )}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className={`font-semibold ${selected === i ? "text-primary" : "text-foreground"}`}>{p.months} Months</p>
-                    <p className="text-2xl font-extrabold text-foreground mt-1">
-                      ${p.monthly.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 3 })}
-                      <span className="text-sm font-normal text-muted-foreground">/mo</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">{p.interest}</p>
-                    <p className="text-xs text-muted-foreground">Total: ${p.total.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
+            {loadingPlans ? (
+              <div className="text-center text-muted-foreground py-12">Loading plans...</div>
+            ) : plans.length === 0 ? (
+              <div className="text-center text-muted-foreground py-12">No payment plans available.</div>
+            ) : (
+              plans.map((p, i) => (
+                <button
+                  key={p.months}
+                  onClick={() => setSelected(i)}
+                  className={`w-full text-left p-5 sm:p-6 rounded-2xl border-2 transition-all relative ${
+                    selected === i
+                      ? "border-primary bg-secondary/50 shadow-card-hover"
+                      : "border-border bg-card hover:border-primary/30"
+                  }`}
+                >
+                  {p.popular && (
+                    <span className="absolute -top-2 right-4 bg-primary text-primary-foreground text-[10px] font-bold px-3 py-0.5 rounded-full">POPULAR</span>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className={`font-semibold ${selected === i ? "text-primary" : "text-foreground"}`}>{p.months} Months</p>
+                      <p className="text-2xl font-extrabold text-foreground mt-1">
+                        ₦{p.monthly?.toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 3 })}
+                        <span className="text-sm font-normal text-muted-foreground">/mo</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">{p.interest}</p>
+                      <p className="text-xs text-muted-foreground">Total: ₦{p.total?.toLocaleString("en-NG", { minimumFractionDigits: 2 })}</p>
+                    </div>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selected === i ? "border-primary" : "border-border"}`}>
+                      {selected === i && <div className="w-3 h-3 rounded-full bg-primary" />}
+                    </div>
                   </div>
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selected === i ? "border-primary" : "border-border"}`}>
-                    {selected === i && <div className="w-3 h-3 rounded-full bg-primary" />}
-                  </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              ))
+            )}
             <div className="bg-muted rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-6">
               <div>
                 <p className="font-semibold text-foreground">Plan Summary</p>
                 <p className="text-sm text-muted-foreground">
-                  You'll pay ${plan.monthly.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 3 })} for {plan.months} months.
+                  {plan.monthly ? `You'll pay ₦${plan.monthly?.toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 3 })} for ${plan.months} months.` : 'Select a plan to see details.'}
                 </p>
               </div>
-              <Button className="rounded-full px-8 w-full sm:w-auto" size="lg" onClick={handleContinue}>Continue</Button>
+              <Button className="rounded-full px-8 w-full sm:w-auto" size="lg" onClick={handleContinue} disabled={!plan.monthly}>Continue</Button>
             </div>
           </div>
           <div className="hidden lg:block">

@@ -7,11 +7,18 @@ const DashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-muted/30">
-      <DashboardSidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
-      <div className="flex-1 flex flex-col min-w-0">
-        <DashboardHeader onToggleSidebar={() => setCollapsed(!collapsed)} />
-        <main className="flex-1 p-6 overflow-auto">
+    <div className="min-h-screen bg-muted/30">
+      {/* Mobile backdrop */}
+      {!collapsed && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+          onClick={() => setCollapsed(true)}
+        />
+      )}
+      <DashboardSidebar collapsed={collapsed} onToggle={() => setCollapsed(true)} />
+      <div className={`flex flex-col min-h-screen transition-all duration-300 ${collapsed ? "" : "lg:ml-64"}`}>
+        <DashboardHeader onToggleSidebar={() => setCollapsed(false)} sidebarCollapsed={collapsed} />
+        <main className="flex-1 p-4 sm:p-6 overflow-auto">
           <Outlet />
         </main>
       </div>

@@ -1,0 +1,101 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "role": "patient",
+      "name": "Jane Doe",
+      "email": "jane@example.com",
+      "phone": "+2348012345678",
+      "avatarUrl": "/avatars/jane.png",
+      "createdAt": "2026-03-01T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "role": "provider",
+      "name": "Dr. Smith Hospital",
+      "email": "drsmith@example.com",
+      "phone": "+2348098765432",
+      "avatarUrl": "/avatars/drsmith.png",
+      "createdAt": "2026-03-01T10:00:00Z"
+    }
+  ],
+  "patients": [
+    {
+      "id": 1,
+      "userId": 1,
+      "providerId": 2,
+      "medicalRecord": "MRN-001",
+      "planId": 1
+    }
+  ],
+  "providers": [
+    {
+      "id": 2,
+      "userId": 2,
+      "hospitalName": "Dr. Smith Hospital",
+      "address": "123 Main St, Lagos",
+      "patients": [1]
+    }
+  ],
+  "bills": [
+    {
+      "id": 1,
+      "patientId": 1,
+      "providerId": 2,
+      "amount": 120000,
+      "description": "Surgery",
+      "status": "pending",
+      "createdAt": "2026-03-10T09:00:00Z"
+    }
+  ],
+  "paymentPlans": [
+    {
+      "id": 1,
+      "billId": 1,
+      "patientId": 1,
+      "providerId": 2,
+      "totalAmount": 120000,
+      "installments": 6,
+      "frequency": "monthly",
+      "startDate": "2026-03-15T00:00:00Z",
+      "status": "active"
+    }
+  ],
+  "payments": [
+    {
+      "id": 1,
+      "planId": 1,
+      "amount": 20000,
+      "paidAt": "2026-03-16T12:00:00Z",
+      "status": "completed"
+    }
+  ],
+  "notifications": [
+    {
+      "id": 1,
+      "userId": 1,
+      "message": "Your payment was successful.",
+      "read": false,
+      "createdAt": "2026-03-16T12:01:00Z"
+    }
+  ],
+  "activities": [
+    {
+      "id": 1,
+      "userId": 1,
+      "type": "payment",
+      "description": "Paid ₦20,000 for Surgery",
+      "createdAt": "2026-03-16T12:01:00Z"
+    }
+  ],
+  "transactions": [
+    {
+      "id": 1,
+      "userId": 1,
+      "amount": 20000,
+      "type": "debit",
+      "description": "Payment for Surgery",
+      "createdAt": "2026-03-16T12:01:00Z"
+    }
+  ]
+}

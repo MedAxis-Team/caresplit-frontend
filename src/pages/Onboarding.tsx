@@ -30,28 +30,30 @@ const Onboarding = () => {
   const slide = slides[step];
 
   return (
-    <div className="min-h-screen bg-secondary/30 flex items-center justify-center p-4">
-      <div className="bg-card rounded-3xl shadow-xl max-w-md w-full overflow-hidden">
-        <div className="relative">
-          <img
-            src={slide.image}
-            alt={slide.title}
-            className="w-full h-80 object-cover"
-          />
+    <div className="min-h-screen w-full flex flex-col md:flex-row bg-secondary/30 overflow-hidden">
+      {/* Left: Image */}
+      <div className="hidden md:flex flex-1 items-center justify-center bg-card">
+        <img
+          src={slide.image}
+          alt={slide.title}
+          className="w-full h-full object-cover max-h-screen"
+          style={{ minHeight: '100vh' }}
+        />
+      </div>
+      {/* Right: Content */}
+      <div className="flex-1 flex items-center justify-center p-6 md:p-16 bg-background min-h-screen">
+        <div className="w-full max-w-md">
           <button
             onClick={() => navigate("/auth-choice")}
-            className="absolute top-4 right-4 text-sm font-medium text-muted-foreground hover:text-foreground"
+            className="absolute top-6 right-6 text-sm font-medium text-muted-foreground hover:text-foreground z-10"
           >
             Skip
           </button>
-        </div>
-
-        <div className="p-8 text-center">
-          <h2 className="text-2xl font-bold text-foreground mb-3">{slide.title}</h2>
-          <p className="text-muted-foreground text-sm mb-8">{slide.desc}</p>
+          <h2 className="text-3xl font-bold text-foreground mb-4 text-left">{slide.title}</h2>
+          <p className="text-muted-foreground text-base mb-10 text-left">{slide.desc}</p>
 
           {/* Dots */}
-          <div className="flex justify-center gap-2 mb-8">
+          <div className="flex gap-2 mb-10">
             {slides.map((_, i) => (
               <div
                 key={i}
@@ -63,7 +65,7 @@ const Onboarding = () => {
           </div>
 
           <Button
-            className="w-full rounded-full"
+            className="w-full rounded-full mb-4"
             size="lg"
             onClick={() => {
               if (isLast) navigate("/auth-choice");
@@ -73,7 +75,7 @@ const Onboarding = () => {
             {isLast ? "Get Started" : "Next"}
           </Button>
 
-          <p className="text-sm text-muted-foreground mt-4">
+          <p className="text-sm text-muted-foreground text-center">
             Already have an account?{" "}
             <Link to="/login" className="text-primary font-semibold hover:underline">
               Log in

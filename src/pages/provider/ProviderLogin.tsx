@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import providerBg from "@/assets/provider-auth-bg.jpg";
 const ProviderLogin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -22,9 +24,34 @@ const ProviderLogin = () => {
       return;
     }
     setLoading(true);
-    setTimeout(() => {
+    setTimeout(async () => {
+      // Fetch users from mock API and match by email
+      let user: any = null;
+      try {
+        const res = await fetch('/api/users');
+        const users = await res.json();
+        const matched = users.find((u: any) => u.email === email);
+        if (matched) {
+          user = {
+            _id: matched._id,
+            name: matched.name,
+            email: matched.email,
+            role: "provider",
+          };
+        }
+      } catch {}
+      if (!user) {
+        user = {
+          _id: "demo-provider-1",
+          name: email.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()),
+          email,
+          role: "provider",
+        };
+      }
+      login({ ...user, role: user.role as "provider" | "patient" });
       toast({ title: "Welcome back!" });
       navigate("/provider/dashboard");
+      setLoading(false);
     }, 800);
   };
 
@@ -92,8 +119,8 @@ const ProviderLogin = () => {
               </div>
             </div>
 
-            <Button className="w-full rounded-full mt-4" size="lg" type="submit" disabled={loading}>
-              {loading ? "Signing in..." : "Sign In"}
+            <Button className="w-full rounded-full mt-4" size="lg" type="submit" disabled={loading || authLoading}>
+              {loading || authLoading ? "Signing in..." : "Sign In"}
             </Button>
 
             <p className="text-center text-sm text-muted-foreground">

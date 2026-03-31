@@ -1,0 +1,13 @@
+{
+  "name": "CareSplit Mock Backend",
+  "version": "1.0.0",
+  "description": "Mock backend for CareSplit using MSW and db.json",
+  "scripts": {
+    "mock:server": "json-server --watch db.json --port 4000",
+    "mock:msw": "vite --host"
+  },
+  "devDependencies": {
+    "msw": "^2.0.0",
+    "json-server": "^0.17.0"
+  }
+}

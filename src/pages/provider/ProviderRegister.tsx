@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import providerBg from "@/assets/provider-auth-bg.jpg";
 const ProviderRegister = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login, loading: authLoading } = useAuth();
   const [form, setForm] = useState({
     hospital: "", contact: "", phone: "", email: "", address: "", password: "", confirm: "",
   });
@@ -20,7 +22,7 @@ const ProviderRegister = () => {
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.hospital || !form.email || !form.password || !form.confirm) {
       toast({ title: "Please fill all required fields", variant: "destructive" });
@@ -31,9 +33,25 @@ const ProviderRegister = () => {
       return;
     }
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: form.contact, email: form.email, phone: form.phone, role: 'provider' }),
+      });
+      const user = await res.json();
+      login({
+        ...user,
+        hospital: form.hospital,
+        address: form.address,
+        role: user.role as "provider" | "patient",
+      });
       navigate("/verify-otp", { state: { email: form.email, redirectTo: "/provider/dashboard" } });
-    }, 500);
+    } catch {
+      toast({ title: "Registration failed. Please try again.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -144,8 +162,8 @@ const ProviderRegister = () => {
               </div>
             </div>
 
-            <Button className="w-full rounded-full mt-2" size="lg" type="submit" disabled={loading}>
-              {loading ? "Creating Account..." : "Create Account"}
+            <Button className="w-full rounded-full mt-2" size="lg" type="submit" disabled={loading || authLoading}>
+              {loading || authLoading ? "Creating Account..." : "Create Account"}
             </Button>
 
             <p className="text-center text-sm text-muted-foreground">

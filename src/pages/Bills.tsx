@@ -1,119 +1,107 @@
-import { Button } from "@/components/ui/button";
-import { Building2, Download, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Building2, Download, Sparkles } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
-const bills = [
-  {
-    id: 1,
-    hospital: "Memorial General Hospital",
-    type: "Emergency Room",
-    amount: 3500,
-    ref: "BILL-4921",
-    date: "Sep 14, 2026",
-    status: "Action Required",
-    statusColor: "text-destructive",
-    charges: [
-      { name: "Emergency Room Visit (Level 4)", amount: 1500 },
-      { name: "CT Scan (Head/Brain)", amount: 1200 },
-      { name: "Laboratory Services", amount: 450 },
-      { name: "Medications", amount: 350 },
-    ],
-    action: "split",
-  },
-  {
-    id: 2,
-    hospital: "Westside Cardiology Clinic",
-    type: "Specialist Visit",
-    amount: 1250,
-    ref: "BILL-3844",
-    date: "Aug 02, 2023",
-    status: "Plan Active",
-    statusColor: "text-green-success",
-    charges: [
-      { name: "Echocardiogram", amount: 800 },
-      { name: "Consultation Fee", amount: 450 },
-    ],
-    action: "manage",
-  },
-  {
-    id: 3,
-    hospital: "City Orthopedics Center",
-    type: "Physical Therapy",
-    amount: 850,
-    ref: "BILL-2910",
-    date: "Jun 15, 2023",
-    status: "Paid in Full",
-    statusColor: "text-muted-foreground",
-    charges: [
-      { name: "Initial Assessment", amount: 250 },
-      { name: "Physical Therapy Sessions (x4)", amount: 600 },
-    ],
-    action: "none",
-  },
-];
+const Bills = () => {
+  const { user: authUser } = useAuth();
+  const [bills, setBills] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editBill, setEditBill] = useState<any>(null);
+  const [editAmount, setEditAmount] = useState("");
+  const [editDesc, setEditDesc] = useState("");
+  const [editLoading, setEditLoading] = useState(false);
 
-const Bills = () => (
-  <div className="max-w-5xl">
-    <h1 className="text-2xl font-bold text-foreground mb-1">Medical Bills</h1>
-    <p className="text-muted-foreground mb-6">Review your outstanding statements and balances.</p>
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/bills?patientId=${authUser._id}`)
+      .then((res) => res.json())
+      .then((data) => setBills(data))
+      .catch(() => setBills([]))
+      .finally(() => setLoading(false));
+  }, [authUser]);
 
-    <div className="grid lg:grid-cols-3 gap-6">
+  return (
+    <div>
+      <div className="mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Medical Bills</h1>
+        <p className="text-sm text-muted-foreground mt-1">Review and manage your healthcare bills in one place.</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
       <div className="lg:col-span-2 space-y-6">
-        {bills.map((bill) => (
-          <div key={bill.id} className={`bg-card rounded-2xl shadow-card overflow-hidden border-t-4 ${bill.action === "split" ? "border-t-destructive" : bill.action === "manage" ? "border-t-orange-warning" : "border-t-border"}`}>
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
-                    <Building2 className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-foreground">{bill.hospital}</p>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1"><Sparkles className="h-3 w-3" /> {bill.type}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-xl font-bold text-foreground">${bill.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
-                  <p className={`text-xs font-medium ${bill.statusColor}`}>{bill.status}</p>
-                </div>
-              </div>
-
-              <div className="bg-muted/50 rounded-xl p-4 space-y-2 text-sm">
-                <div className="flex justify-between"><span className="text-muted-foreground">Bill Reference</span><span className="text-foreground">{bill.ref}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Service Date</span><span className="text-foreground">{bill.date}</span></div>
-                <div className="mt-3">
-                  <p className="font-semibold text-foreground mb-2">Itemized Charges</p>
-                  {bill.charges.map((c) => (
-                    <div key={c.name} className="flex justify-between py-0.5">
-                      <span className="text-muted-foreground">{c.name}</span>
-                      <span className="text-foreground">${c.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
+        {loading ? (
+          <div className="text-center py-16 text-muted-foreground">Loading bills...</div>
+        ) : bills.length === 0 ? (
+          <div className="text-center py-16 text-muted-foreground">No bills found.</div>
+        ) : (
+          bills.map((bill) => (
+            <div key={bill.id} className={`bg-card rounded-2xl shadow-card overflow-hidden border-t-4 ${bill.action === "split" ? "border-t-destructive" : bill.action === "manage" ? "border-t-orange-warning" : "border-t-border"}`}>
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
+                      <Building2 className="h-5 w-5 text-primary" />
                     </div>
-                  ))}
+                    <div>
+                      <p className="font-semibold text-foreground">{bill.hospital}</p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1"><Sparkles className="h-3 w-3" /> {bill.type}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xl font-bold text-foreground">₦{bill.amount?.toLocaleString("en-NG", { minimumFractionDigits: 2 })}</p>
+                    <p className={`text-xs font-medium ${bill.statusColor}`}>{bill.status}</p>
+                  </div>
                 </div>
-                <div className="flex justify-between pt-2 border-t border-border font-semibold">
-                  <span className="text-foreground">Total Amount</span>
-                  <span className="text-foreground">${bill.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
-                </div>
-              </div>
 
-              <div className="flex gap-3 mt-4">
-                {bill.action === "split" && (
-                  <Link to="/dashboard/payment-plans" className="flex-1">
-                    <Button className="w-full rounded-full">Split Bill with CareSplit</Button>
-                  </Link>
-                )}
-                {bill.action === "manage" && (
-                  <Link to="/dashboard/manage-plan" className="flex-1">
-                    <Button className="w-full rounded-full" variant="outline">Manage Payment Plan</Button>
-                  </Link>
-                )}
-                <Button variant="outline" className="rounded-full gap-2">
-                  <Download className="h-4 w-4" /> Download PDF
-                </Button>
+                <div className="bg-muted/50 rounded-xl p-4 space-y-2 text-sm">
+                  <div className="flex justify-between"><span className="text-muted-foreground">Bill Reference</span><span className="text-foreground">{bill.ref}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Service Date</span><span className="text-foreground">{bill.date}</span></div>
+                  <div className="mt-3">
+                    <p className="font-semibold text-foreground mb-2">Itemized Charges</p>
+                    {bill.charges?.map((c: any) => (
+                      <div key={c.name} className="flex justify-between py-0.5">
+                        <span className="text-muted-foreground">{c.name}</span>
+                        <span className="text-foreground">₦{c.amount?.toLocaleString("en-NG", { minimumFractionDigits: 2 })}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex justify-between pt-2 border-t border-border font-semibold">
+                    <span className="text-foreground">Total Amount</span>
+                    <span className="text-foreground">₦{bill.amount?.toLocaleString("en-NG", { minimumFractionDigits: 2 })}</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 sm:gap-3 mt-4">
+                  <Button variant="outline" size="sm" onClick={() => {
+                    setEditBill(bill);
+                    setEditAmount(bill.amount);
+                    setEditDesc(bill.description || "");
+                    setShowEditModal(true);
+                  }}>Edit</Button>
+                  {bill.action === "split" && (
+                    <Link to="/dashboard/payment-plans" className="flex-1">
+                      <Button className="w-full rounded-full">Split Bill with CareSplit</Button>
+                    </Link>
+                  )}
+                  {bill.action === "manage" && (
+                    <Link to="/dashboard/manage-plan" className="flex-1">
+                      <Button className="w-full rounded-full" variant="outline">Manage Payment Plan</Button>
+                    </Link>
+                  )}
+                  <Button variant="outline" className="rounded-full gap-2">
+                    <Download className="h-4 w-4" /> Download PDF
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Right sidebar info */}
@@ -149,8 +137,58 @@ const Bills = () => (
           </div>
         </div>
       </div>
+      </div>
+
+      {/* Edit Bill Modal */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Bill</DialogTitle>
+          </DialogHeader>
+          {editBill && (
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              setEditLoading(true);
+              await fetch(`/api/bills/${editBill.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  amount: Number(editAmount),
+                  description: editDesc,
+                }),
+              });
+              setEditLoading(false);
+              setShowEditModal(false);
+              setEditBill(null);
+              setEditAmount("");
+              setEditDesc("");
+              setLoading(true);
+              fetch(`/api/bills?patientId=${authUser._id}`)
+                .then((res) => res.json())
+                .then((data) => setBills(data))
+                .catch(() => setBills([]))
+                .finally(() => setLoading(false));
+            }}>
+              <div className="space-y-4">
+                <div>
+                  <Label>Amount (₦)</Label>
+                  <Input type="number" min="0" required value={editAmount} onChange={e => setEditAmount(e.target.value)} />
+                </div>
+                <div>
+                  <Label>Description</Label>
+                  <Input required value={editDesc} onChange={e => setEditDesc(e.target.value)} />
+                </div>
+              </div>
+              <DialogFooter className="mt-6">
+                <Button type="button" variant="outline" onClick={() => setShowEditModal(false)}>Cancel</Button>
+                <Button type="submit" disabled={editLoading}>{editLoading ? "Saving..." : "Save Changes"}</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
-  </div>
-);
+  );
+};
 
 export default Bills;
