@@ -7,6 +7,7 @@ import CareSplitLogo from "@/components/CareSplitLogo";
 import { ArrowLeft, User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { authStore } from "@/lib/authStore";
 import authImage from "@/assets/auth-nurse.jpg";
 
 const Signup = () => {
@@ -33,24 +34,21 @@ const Signup = () => {
       return;
     }
     setLoading(true);
-    try {
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: form.name, email: form.email, phone: form.phone, role: 'patient' }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || "Registration failed");
-      }
-      const user = await res.json();
-      login({ ...user, role: user.role as "patient" | "provider" });
-      navigate("/verify-otp", { state: { email: form.email, redirectTo: "/dashboard" } });
-    } catch {
-      toast({ title: "Registration failed. Please try again.", variant: "destructive" });
-    } finally {
+    const result = authStore.register({
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      password: form.password,
+      role: "patient",
+    });
+    if (!result.ok) {
+      toast({ title: result.error, variant: "destructive" });
       setLoading(false);
+      return;
     }
+    login({ ...result.user, role: "patient" });
+    setLoading(false);
+    navigate("/verify-otp", { state: { email: form.email, redirectTo: "/dashboard" } });
   };
 
   return (

@@ -8,7 +8,7 @@ const metrics = [
 ];
 
 const TrustMetrics = () => (
-  <section className="py-16 border-y border-border">
+  <section className="py-8 md:py-16 border-y border-border">
     <div className="container">
       <p className="text-center text-sm font-semibold text-primary mb-8">
         Trusted by patients and healthcare providers nationwide

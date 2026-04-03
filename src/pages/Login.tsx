@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import CareSplitLogo from "@/components/CareSplitLogo";
 import { ArrowLeft, Mail, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { authStore } from "@/lib/authStore";
 import authImage from "@/assets/auth-nurse.jpg";
 
 const Login = () => {
@@ -25,24 +26,15 @@ const Login = () => {
         return;
       }
       setLoading(true);
-      try {
-        const res = await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, role: 'patient' }),
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err.error || "Login failed");
-        }
-        const userData = await res.json();
-        await login({ ...userData, role: userData.role as "provider" | "patient" });
-        navigate("/dashboard");
-      } catch (err: any) {
-        toast({ title: "Login failed", description: err?.message || "Invalid credentials", variant: "destructive" });
-      } finally {
+      const result = authStore.login(email, password);
+      if (!result.ok) {
+        toast({ title: "Login failed", description: result.error, variant: "destructive" });
         setLoading(false);
+        return;
       }
+      login({ ...result.user, role: result.user.role as "provider" | "patient" });
+      setLoading(false);
+      navigate(result.user.role === "provider" ? "/provider/dashboard" : "/dashboard");
     };
 
     return (

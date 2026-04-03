@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { authStore } from "@/lib/authStore";
 import providerBg from "@/assets/provider-auth-bg.jpg";
 
 const ProviderLogin = () => {
@@ -24,25 +25,16 @@ const ProviderLogin = () => {
       return;
     }
     setLoading(true);
-    try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, role: 'provider' }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || "Login failed");
-      }
-      const user = await res.json();
-      login({ ...user, role: "provider" });
-      toast({ title: "Welcome back!" });
-      navigate("/provider/dashboard");
-    } catch (err: any) {
-      toast({ title: "Login failed", description: err?.message || "Invalid credentials", variant: "destructive" });
-    } finally {
+    const result = authStore.login(email, password);
+    if (!result.ok) {
+      toast({ title: "Login failed", description: result.error, variant: "destructive" });
       setLoading(false);
+      return;
     }
+    login({ ...result.user, role: "provider" });
+    toast({ title: "Welcome back!" });
+    setLoading(false);
+    navigate("/provider/dashboard");
   };
 
   return (

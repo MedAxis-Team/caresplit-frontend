@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Building2, User, Phone, Mail, MapPin, Lock, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { authStore } from "@/lib/authStore";
 import providerBg from "@/assets/provider-auth-bg.jpg";
 
 const ProviderRegister = () => {
@@ -33,31 +34,23 @@ const ProviderRegister = () => {
       return;
     }
     setLoading(true);
-    try {
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: form.contact || form.hospital,
-          email: form.email,
-          phone: form.phone,
-          role: 'provider',
-          hospital: form.hospital,
-          address: form.address,
-        }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || "Registration failed");
-      }
-      const user = await res.json();
-      login({ ...user, hospital: form.hospital, address: form.address, role: "provider" });
-      navigate("/verify-otp", { state: { email: form.email, redirectTo: "/provider/dashboard" } });
-    } catch (err: any) {
-      toast({ title: "Registration failed", description: err?.message || "Please try again.", variant: "destructive" });
-    } finally {
+    const result = authStore.register({
+      name: form.contact || form.hospital,
+      email: form.email,
+      phone: form.phone,
+      password: form.password,
+      role: "provider",
+      hospital: form.hospital,
+      address: form.address,
+    });
+    if (!result.ok) {
+      toast({ title: result.error, variant: "destructive" });
       setLoading(false);
+      return;
     }
+    login({ ...result.user, hospital: form.hospital, address: form.address, role: "provider" });
+    setLoading(false);
+    navigate("/verify-otp", { state: { email: form.email, redirectTo: "/provider/dashboard" } });
   };
 
   return (

@@ -7,8 +7,8 @@ const navItems = [
   { icon: DollarSign, label: "Bills", path: "/dashboard/bills" },
   { icon: CreditCard, label: "Payment Plans", path: "/dashboard/payment-plans" },
   { icon: LineChart, label: "Manage Plan", path: "/dashboard/manage-plan" },
-  { icon: Bell, label: "Notifications", path: "/dashboard/notifications" },
   { icon: Receipt, label: "Transaction", path: "/dashboard/transactions" },
+  { icon: Bell, label: "Notifications", path: "/dashboard/notifications" },
   { icon: Settings, label: "Settings", path: "/dashboard/settings" },
 ];
 

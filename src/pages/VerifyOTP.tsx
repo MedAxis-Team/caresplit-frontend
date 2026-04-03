@@ -72,28 +72,28 @@ const VerifyOTP = () => {
       </div>
 
       {/* Right form */}
-      <div className="flex flex-col p-8 lg:p-16">
-        <div className="flex items-center justify-between mb-12">
+      <div className="flex flex-col p-5 sm:p-8 lg:p-16 overflow-y-auto">
+        <div className="flex items-center justify-between mb-6 sm:mb-12">
           <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-5 w-5" /> Back
           </button>
           <a href="#" className="text-sm text-primary hover:underline">Need help? Contact Support</a>
         </div>
 
-        <div className="max-w-md">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Verify your email</h1>
-          <p className="text-muted-foreground mb-8">
+        <div className="max-w-md w-full mx-auto">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Verify your email</h1>
+          <p className="text-muted-foreground mb-5 sm:mb-8 text-sm sm:text-base">
             We've sent a 6-digit verification code to <strong>{email}</strong>.
           </p>
 
           <div className="mb-6">
             <InputOTP maxLength={6} value={otp} onChange={(val) => { setOtp(val); setError(false); }}>
-              <InputOTPGroup className="gap-3">
+              <InputOTPGroup className="gap-2 sm:gap-3">
                 {[0, 1, 2, 3, 4, 5].map((i) => (
                   <InputOTPSlot
                     key={i}
                     index={i}
-                    className={`w-14 h-14 text-xl border-2 rounded-xl ${
+                    className={`w-10 h-10 sm:w-14 sm:h-14 text-base sm:text-xl border-2 rounded-xl ${
                       verified
                         ? "border-green-500 text-green-600"
                         : error

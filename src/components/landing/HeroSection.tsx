@@ -6,9 +6,9 @@ import { motion } from "framer-motion";
 
 const HeroSection = () => (
   <section className="relative overflow-hidden bg-background">
-    <div className="grid lg:grid-cols-2 h-[calc(100vh-4rem)]">
+    <div className="grid lg:grid-cols-2 h-auto lg:h-[calc(100vh-4rem)]">
       {/* Left: Text content */}
-      <div className="relative z-10 flex flex-col justify-start px-6 sm:px-10 lg:px-16 pt-10 sm:pt-12 lg:pt-14 pb-8">
+      <div className="relative z-10 flex flex-col justify-start px-6 sm:px-10 lg:px-16 pt-16 sm:pt-20 lg:pt-20 pb-10 lg:pb-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -21,7 +21,7 @@ const HeroSection = () => (
           </span>
 
           {/* Headline */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.1] mt-6 mb-4">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.1] mt-8 mb-4">
             Focus on healing,<br />
             not <span className="text-primary">hospital bills.</span>
           </h1>
@@ -33,7 +33,7 @@ const HeroSection = () => (
 
           {/* CTA */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-8">
-            <Link to="/onboarding">
+            <Link to="/auth-choice?mode=signup">
               <Button size="lg" className="rounded-full px-8 shadow-md">
                 Check Your Eligibility <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
