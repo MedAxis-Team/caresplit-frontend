@@ -29,7 +29,7 @@ const DashboardSidebar = ({ collapsed, onToggle }: Props) => {
       `}
     >
       <div className="p-4">
-        <CareSplitLogo variant="white" size="sm" />
+        <Link to="/"><CareSplitLogo variant="white" size="sm" /></Link>
       </div>
 
       <button
