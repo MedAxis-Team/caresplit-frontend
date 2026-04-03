@@ -1,47 +1,65 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Lock } from "lucide-react";
-import heroImage from "@/assets/heroImage.png";
+import { ArrowRight, ShieldCheck } from "lucide-react";
+import heroPatient from "@/assets/hero-patient.jpg";
 import { motion } from "framer-motion";
 
 const HeroSection = () => (
-  <section className="relative overflow-hidden">
+  <section className="relative overflow-hidden bg-background">
     <div className="grid lg:grid-cols-2 min-h-[calc(100vh-4rem)]">
-      <div className="relative z-10 flex flex-col justify-center px-6 lg:px-16 py-10 sm:py-16 lg:py-24">
+      {/* Left: Text content */}
+      <div className="relative z-10 flex flex-col justify-center px-6 sm:px-10 lg:px-16 pt-8 pb-10 lg:py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          className="max-w-lg"
         >
-          <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-1.5 text-xs font-medium text-secondary-foreground mb-6">
+          {/* Badge */}
+          <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-1.5 text-xs font-semibold text-primary mb-5 tracking-wide">
             💜 Healthcare financing, reimagined
           </span>
-          <h1 className="text-4xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-tight mb-6">
+
+          {/* Headline */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.1] mb-5">
             Focus on healing,<br />
             not <span className="text-primary">hospital bills.</span>
           </h1>
-          <p className="text-muted-foreground text-lg max-w-md mb-8">
-            Split your medical expenses into flexible, transparent, zero-interest monthly payments. No hidden fees, no credit damage.
+
+          {/* Subheading */}
+          <p className="text-muted-foreground text-base sm:text-lg leading-relaxed mb-8 max-w-sm lg:max-w-md">
+            Split your medical expenses into flexible, zero-interest monthly payments — with no hidden fees and no credit impact.
           </p>
-          <div className="flex flex-wrap items-center gap-4">
+
+          {/* CTA */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <Link to="/onboarding">
-              <Button size="lg" className="rounded-full px-8 shadow-purple">
+              <Button size="lg" className="rounded-full px-8 shadow-md">
                 Check Your Eligibility <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
-            <span className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Lock className="h-4 w-4" /> No impact on credit score
+            <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <ShieldCheck className="h-4 w-4 text-green-500 flex-shrink-0" />
+              No impact on credit score
             </span>
+          </div>
+
+          {/* Trust strip */}
+          <div className="flex flex-wrap gap-x-6 gap-y-2 mt-8 text-xs text-muted-foreground">
+            <span>✓ 0% interest, always</span>
+            <span>✓ 3, 6 or 12-month plans</span>
+            <span>✓ Works at any hospital</span>
           </div>
         </motion.div>
       </div>
 
+      {/* Right: Hero image */}
       <div className="relative hidden lg:block">
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/50 to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/20 to-transparent z-10" />
         <img
-          src={heroImage}
-          alt="Healthcare professional smiling"
-          className="h-full w-full object-cover"
+          src={heroPatient}
+          alt="Patient receiving healthcare"
+          className="h-full w-full object-cover object-center"
           width={800}
           height={960}
         />
