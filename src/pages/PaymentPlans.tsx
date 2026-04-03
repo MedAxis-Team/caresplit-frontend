@@ -77,7 +77,6 @@ const PaymentPlans = () => {
     } catch { /* continue to confirmation */ }
     setLoading(false);
     setStep(3);
-    }, 1500);
   };
 
   const handleGoToDashboard = () => navigate("/dashboard");
