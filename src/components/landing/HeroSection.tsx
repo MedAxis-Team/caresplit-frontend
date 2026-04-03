@@ -5,10 +5,10 @@ import heroPatient from "@/assets/hero-patient.jpg";
 import { motion } from "framer-motion";
 
 const HeroSection = () => (
-  <section className="relative overflow-hidden bg-background">
-    <div className="grid lg:grid-cols-2 h-auto lg:h-[calc(100vh-4rem)]">
+  <section className="relative overflow-hidden bg-background min-h-[calc(100vh-4rem)] flex flex-col">
+    <div className="grid lg:grid-cols-2 flex-1 min-h-[calc(100vh-4rem)]">
       {/* Left: Text content */}
-      <div className="relative z-10 flex flex-col justify-start px-6 sm:px-10 lg:px-16 pt-16 sm:pt-20 lg:pt-20 pb-10 lg:pb-8">
+      <div className="relative z-10 flex flex-col justify-start px-6 sm:px-10 lg:px-16 pt-12 sm:pt-14 lg:pt-20 pb-10 lg:pb-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
