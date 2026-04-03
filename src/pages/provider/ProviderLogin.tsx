@@ -17,26 +17,32 @@ const ProviderLogin = () => {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       toast({ title: "Please enter email and password", variant: "destructive" });
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      // Simulate provider user data; in real app, fetch from API
-      const user = {
-        _id: "demo-provider-1",
-        name: "Dr. Sarah Mitchell",
-        email,
-        role: "provider",
-      };
-      login({ ...user, role: user.role as "provider" | "patient" });
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, role: 'provider' }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Login failed");
+      }
+      const user = await res.json();
+      login({ ...user, role: "provider" });
       toast({ title: "Welcome back!" });
       navigate("/provider/dashboard");
+    } catch (err: any) {
+      toast({ title: "Login failed", description: err?.message || "Invalid credentials", variant: "destructive" });
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   return (

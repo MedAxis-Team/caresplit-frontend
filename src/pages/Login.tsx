@@ -20,16 +20,22 @@ const Login = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
+      if (!email) {
+        toast({ title: "Please enter your email", variant: "destructive" });
+        return;
+      }
       setLoading(true);
       try {
-        // Simulate authentication for demo/mock backend
-        const userData = {
-          _id: "demo-user-id",
-          name: "Demo User",
-          email,
-          role: email.includes("provider") ? "provider" : "patient",
-          token: "demo-token",
-        };
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, role: 'patient' }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || "Login failed");
+        }
+        const userData = await res.json();
         await login({ ...userData, role: userData.role as "provider" | "patient" });
         navigate("/dashboard");
       } catch (err: any) {

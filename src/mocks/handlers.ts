@@ -94,6 +94,35 @@ export const handlers = [
     return HttpResponse.json(newUser, { status: 201 });
   }),
 
+  // Login (patient & provider)
+  http.post(`${API_URL}/login`, async ({ request }) => {
+    const body = await request.json() as any;
+    const email = (body.email || "").trim().toLowerCase();
+    if (!email) {
+      return HttpResponse.json({ error: "Email is required" }, { status: 400 });
+    }
+    // Find user by email
+    const user = db.users.find((u: any) => u.email.toLowerCase() === email);
+    if (user) {
+      return HttpResponse.json({ ...user, token: "mock-jwt-token" });
+    }
+    // If no exact match, create a new user on-the-fly (demo mode — no real auth)
+    const role = body.role || "patient";
+    const nextId = db.users.length + 1;
+    const newUser: any = {
+      id: nextId,
+      _id: `user-${Date.now()}`,
+      patientId: role === "patient" ? `PAT-${10000 + nextId}` : undefined,
+      role,
+      name: body.name || email.split("@")[0],
+      email: body.email,
+      phone: body.phone || "",
+      token: "mock-jwt-token",
+    };
+    db.users.push(newUser);
+    return HttpResponse.json(newUser, { status: 201 });
+  }),
+
   // Users
   http.get(`${API_URL}/users`, () => {
     return HttpResponse.json(db.users);

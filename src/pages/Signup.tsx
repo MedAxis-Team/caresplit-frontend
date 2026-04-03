@@ -39,6 +39,10 @@ const Signup = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.name, email: form.email, phone: form.phone, role: 'patient' }),
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Registration failed");
+      }
       const user = await res.json();
       login({ ...user, role: user.role as "patient" | "provider" });
       navigate("/verify-otp", { state: { email: form.email, redirectTo: "/dashboard" } });
