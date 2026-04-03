@@ -33,7 +33,7 @@ const HeroSection = () => (
 
           {/* CTA */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-8">
-            <Link to="/auth-choice?mode=signup">
+            <Link to="/onboarding">
               <Button size="lg" className="rounded-full px-8 shadow-md">
                 Check Your Eligibility <ArrowRight className="ml-2 h-4 w-4" />
               </Button>

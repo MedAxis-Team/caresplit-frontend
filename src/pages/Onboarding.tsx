@@ -36,14 +36,14 @@ const Onboarding = () => {
   // Auto-advance slides
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (isLast) navigate("/auth-choice");
+      if (isLast) navigate("/auth-choice?mode=signup");
       else setStep((s) => s + 1);
     }, AUTO_ADVANCE_MS);
     return () => clearTimeout(timer);
   }, [step, autoKey, isLast, navigate]);
 
   const goNext = () => {
-    if (isLast) navigate("/auth-choice");
+    if (isLast) navigate("/auth-choice?mode=signup");
     else {
       setStep((s) => s + 1);
       setAutoKey((k) => k + 1); // reset auto-timer
@@ -73,7 +73,7 @@ const Onboarding = () => {
       <div className="flex-1 flex items-center justify-center p-6 md:p-16 bg-background min-h-screen">
         <div className="w-full max-w-md">
           <button
-            onClick={() => navigate("/auth-choice")}
+            onClick={() => navigate("/auth-choice?mode=signup")}
             className="absolute top-6 right-6 text-sm font-medium text-muted-foreground hover:text-foreground z-10"
           >
             Skip

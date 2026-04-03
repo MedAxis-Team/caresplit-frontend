@@ -27,7 +27,7 @@ const Navbar = () => {
 
         <div className="hidden md:flex items-center gap-3">
           <Link to="/auth-choice?mode=login"><Button variant="ghost" size="sm">Log in</Button></Link>
-          <Link to="/auth-choice?mode=signup"><Button size="sm" className="rounded-full px-6">Get Started</Button></Link>
+          <Link to="/onboarding"><Button size="sm" className="rounded-full px-6">Get Started</Button></Link>
         </div>
 
         <button className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors" onClick={() => setOpen(!open)}>
@@ -49,7 +49,7 @@ const Navbar = () => {
                 <Link to="/auth-choice?mode=login" onClick={() => setOpen(false)}>
                   <Button variant="outline" className="w-full rounded-xl" size="lg">Log in</Button>
                 </Link>
-                <Link to="/auth-choice?mode=signup" onClick={() => setOpen(false)}>
+                <Link to="/onboarding" onClick={() => setOpen(false)}>
                   <Button className="w-full rounded-xl" size="lg">Get Started</Button>
                 </Link>
               </div>
