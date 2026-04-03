@@ -50,12 +50,12 @@ const Onboarding = () => {
             Skip
           </button>
 
-          {/* Mobile: image shown in a rounded card */}
+          {/* Mobile: image shown in a rounded card — object-top keeps faces in frame */}
           <div className="md:hidden mb-6 rounded-2xl overflow-hidden">
             <img
               src={slide.image}
               alt={slide.title}
-              className="w-full h-48 sm:h-56 object-cover"
+              className="w-full h-52 sm:h-64 object-cover object-top"
             />
           </div>
 

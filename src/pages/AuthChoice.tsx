@@ -1,12 +1,21 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import CareSplitLogo from "@/components/CareSplitLogo";
+import { ArrowLeft } from "lucide-react";
 
 const AuthChoice = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-8 relative">
+      {/* Back arrow — top-left, navigates to landing page */}
+      <Link
+        to="/"
+        className="absolute top-5 left-5 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" /> Back
+      </Link>
+
       {/* Logo + tagline */}
       <div className="flex flex-col items-center gap-3 mb-12 sm:mb-16">
         <CareSplitLogo size="lg" />
