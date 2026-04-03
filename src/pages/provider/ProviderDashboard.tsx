@@ -69,9 +69,33 @@ const ProviderDashboard = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {loading ? (
-          <div className="col-span-full text-center text-muted-foreground py-12">Loading stats...</div>
+          [0,1,2,3].map((i) => (
+            <div key={i} className="bg-card rounded-2xl shadow-card p-4 sm:p-5 animate-pulse">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 rounded-xl bg-muted" />
+                <div className="w-14 h-5 rounded-full bg-muted" />
+              </div>
+              <div className="w-24 h-3 rounded bg-muted mb-2" />
+              <div className="w-16 h-7 rounded bg-muted" />
+            </div>
+          ))
         ) : stats.length === 0 ? (
-          <div className="col-span-full text-center text-muted-foreground py-12">No data yet. Enroll patients and add bills to see stats.</div>
+          [
+            { label: "Total Revenue", icon: DollarSign, color: "bg-blue-100 text-blue-600" },
+            { label: "Active Plans", icon: LineChart, color: "bg-green-100 text-green-600" },
+            { label: "Total Patients", icon: Users, color: "bg-purple-100 text-purple-600" },
+            { label: "Collection Rate", icon: TrendingUp, color: "bg-orange-100 text-orange-600" },
+          ].map((s) => (
+            <div key={s.label} className="bg-card rounded-2xl shadow-card p-4 sm:p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className={`w-10 h-10 rounded-xl ${s.color} flex items-center justify-center`}>
+                  <s.icon className="h-5 w-5" />
+                </div>
+              </div>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mb-1">{s.label}</p>
+              <p className="text-lg sm:text-2xl font-bold text-muted-foreground/40">—</p>
+            </div>
+          ))
         ) : (
           stats.map((s: any) => {
             const Icon = iconMap[s.icon] || DollarSign;
