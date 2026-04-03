@@ -6,9 +6,9 @@ import { motion } from "framer-motion";
 
 const HeroSection = () => (
   <section className="relative overflow-hidden bg-background">
-    <div className="grid lg:grid-cols-2 min-h-[calc(100vh-4rem)]">
+    <div className="grid lg:grid-cols-2 h-[calc(100vh-4rem)]">
       {/* Left: Text content */}
-      <div className="relative z-10 flex flex-col justify-center px-6 sm:px-10 lg:px-16 pt-8 pb-10 lg:py-20">
+      <div className="relative z-10 flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-0">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -16,23 +16,23 @@ const HeroSection = () => (
           className="max-w-lg"
         >
           {/* Badge */}
-          <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-1.5 text-xs font-semibold text-primary mb-5 tracking-wide">
+          <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-1.5 text-xs font-semibold text-primary tracking-wide">
             💜 Healthcare financing, reimagined
           </span>
 
           {/* Headline */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.1] mb-5">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.1] mt-6 mb-4">
             Focus on healing,<br />
             not <span className="text-primary">hospital bills.</span>
           </h1>
 
           {/* Subheading */}
-          <p className="text-muted-foreground text-base sm:text-lg leading-relaxed mb-8 max-w-sm lg:max-w-md">
+          <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-sm lg:max-w-md">
             Split your medical expenses into flexible, zero-interest monthly payments — with no hidden fees and no credit impact.
           </p>
 
           {/* CTA */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-8">
             <Link to="/onboarding">
               <Button size="lg" className="rounded-full px-8 shadow-md">
                 Check Your Eligibility <ArrowRight className="ml-2 h-4 w-4" />
@@ -45,7 +45,7 @@ const HeroSection = () => (
           </div>
 
           {/* Trust strip */}
-          <div className="flex flex-wrap gap-x-6 gap-y-2 mt-8 text-xs text-muted-foreground">
+          <div className="flex flex-wrap gap-x-6 gap-y-2 mt-6 text-xs text-muted-foreground">
             <span>✓ 0% interest, always</span>
             <span>✓ 3, 6 or 12-month plans</span>
             <span>✓ Works at any hospital</span>
@@ -53,13 +53,13 @@ const HeroSection = () => (
         </motion.div>
       </div>
 
-      {/* Right: Hero image */}
-      <div className="relative hidden lg:block">
+      {/* Right: Hero image — constrained to viewport height */}
+      <div className="relative hidden lg:block overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/20 to-transparent z-10" />
         <img
           src={heroPatient}
           alt="Patient receiving healthcare"
-          className="h-full w-full object-cover object-center"
+          className="absolute inset-0 h-full w-full object-cover object-top"
           width={800}
           height={960}
         />
