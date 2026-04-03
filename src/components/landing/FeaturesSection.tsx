@@ -41,7 +41,7 @@ const PaymentCard = () => (
 );
 
 const FeaturesSection = () => (
-  <section id="features" className="py-20">
+  <section id="features" className="pt-20 pb-10">
     <div className="container">
       {/* Desktop: 2-column grid */}
       <div className="hidden lg:grid lg:grid-cols-2 gap-8">

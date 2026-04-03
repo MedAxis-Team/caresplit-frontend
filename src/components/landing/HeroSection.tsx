@@ -8,7 +8,7 @@ const HeroSection = () => (
   <section className="relative overflow-hidden bg-background">
     <div className="grid lg:grid-cols-2 h-[calc(100vh-4rem)]">
       {/* Left: Text content */}
-      <div className="relative z-10 flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-0">
+      <div className="relative z-10 flex flex-col justify-start px-6 sm:px-10 lg:px-16 pt-10 sm:pt-12 lg:pt-14 pb-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

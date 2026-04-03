@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import ctaImage from "@/assets/cta-family.jpg";
 
 const CTABanner = () => (
-  <section className="py-20">
+  <section className="pt-6 pb-16">
     <div className="container">
       <div className="relative rounded-3xl overflow-hidden min-h-[300px] flex items-center">
         <img
