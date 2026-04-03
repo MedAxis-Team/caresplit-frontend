@@ -140,7 +140,7 @@ const ProviderDashboard = () => {
             ))}
           </div>
           {/* Y-axis labels */}
-          <div className="absolute left-0 top-0 h-48 sm:h-64 flex flex-col justify-between py-2 text-[9px] sm:text-[10px] text-muted-foreground">
+          <div className="absolute left-0 top-0 h-48 sm:h-64 flex flex-col justify-between py-2 text-[9px] sm:text-[10px] text-muted-foreground pointer-events-none hidden sm:flex">
             <span>₦100k</span><span>₦75k</span><span>₦50k</span><span>₦25k</span><span>₦0k</span>
           </div>
         </div>

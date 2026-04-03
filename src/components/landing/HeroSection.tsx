@@ -6,8 +6,8 @@ import { motion } from "framer-motion";
 
 const HeroSection = () => (
   <section className="relative overflow-hidden">
-    <div className="grid lg:grid-cols-2 min-h-screen">
-      <div className="relative z-10 flex flex-col justify-center px-6 lg:px-16 py-16 lg:py-24">
+    <div className="grid lg:grid-cols-2 min-h-[calc(100vh-4rem)]">
+      <div className="relative z-10 flex flex-col justify-center px-6 lg:px-16 py-10 sm:py-16 lg:py-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

@@ -31,7 +31,7 @@ const Onboarding = () => {
 
   return (
     <div className="min-h-screen w-full flex flex-col md:flex-row bg-secondary/30 overflow-hidden">
-      {/* Left: Image */}
+      {/* Left: Image — desktop only, full-bleed */}
       <div className="hidden md:flex flex-1 items-center justify-center bg-card">
         <img
           src={slide.image}
@@ -49,7 +49,17 @@ const Onboarding = () => {
           >
             Skip
           </button>
-          <h2 className="text-3xl font-bold text-foreground mb-4 text-left">{slide.title}</h2>
+
+          {/* Mobile: image shown in a rounded card */}
+          <div className="md:hidden mb-6 rounded-2xl overflow-hidden">
+            <img
+              src={slide.image}
+              alt={slide.title}
+              className="w-full h-48 sm:h-56 object-cover"
+            />
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4 text-left">{slide.title}</h2>
           <p className="text-muted-foreground text-base mb-10 text-left">{slide.desc}</p>
 
           {/* Dots */}

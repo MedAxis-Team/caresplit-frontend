@@ -87,12 +87,12 @@ const DashboardSettings = () => {
               </div>
 
               {/* Danger Zone */}
-              <div className="bg-red-50 border border-red-200 rounded-2xl p-5 flex items-center justify-between">
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div>
                   <h3 className="font-semibold text-red-600">Danger Zone</h3>
                   <p className="text-sm text-muted-foreground">Permanently delete your account and data.</p>
                 </div>
-                <Button variant="outline" className="rounded-lg border-red-300 text-red-600 hover:bg-red-100">Delete Account</Button>
+                <Button variant="outline" className="rounded-lg border-red-300 text-red-600 hover:bg-red-100 whitespace-nowrap">Delete Account</Button>
               </div>
             </div>
           )}

@@ -90,7 +90,7 @@ const ManagePlan = () => {
     return (
       <div className="max-w-5xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Adjust Payment Plan</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Adjust Payment Plan</h1>
           <p className="text-sm text-muted-foreground mt-1">We understand financial situations change. Explore your hardship options below.</p>
         </div>
 
@@ -112,7 +112,7 @@ const ManagePlan = () => {
                 <h3 className="font-semibold text-foreground">Current Plan</h3>
                 <span className="text-xs font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">Active</span>
               </div>
-              <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Duration</p>
                   <p className="text-lg font-bold text-foreground">{planMonths} months</p>
@@ -250,7 +250,7 @@ const ManagePlan = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Manage Payment Plan</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Manage Payment Plan</h1>
         <p className="text-sm text-muted-foreground mt-1">We understand financial situations change. Explore your hardship options below.</p>
       </div>
 

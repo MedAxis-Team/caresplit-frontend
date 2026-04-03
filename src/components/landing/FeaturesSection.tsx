@@ -118,7 +118,7 @@ const FeaturesSection = () => (
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl font-bold text-foreground mb-2 italic leading-tight">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2 italic leading-tight">
             Designed for patients,<br />built for peace of mind.
           </h2>
           <div className="space-y-6">
@@ -135,8 +135,6 @@ const FeaturesSection = () => (
             ))}
           </div>
         </motion.div>
-        <img src={featuresImg} alt="Doctor consulting with patient" className="rounded-2xl w-full object-cover aspect-[4/3]" loading="lazy" />
-        <img src={paymentImg} alt="Smiling woman" className="rounded-2xl w-full object-cover aspect-[4/3]" loading="lazy" />
         <div className="flex justify-center">
           <PaymentCard />
         </div>

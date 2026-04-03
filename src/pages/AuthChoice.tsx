@@ -6,7 +6,7 @@ const AuthChoice = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-white flex flex-col items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-8">
       {/* Logo + tagline */}
       <div className="flex flex-col items-center gap-3 mb-12 sm:mb-16">
         <CareSplitLogo size="lg" />
