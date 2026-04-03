@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Search, Filter, UserPlus, FileText, AlertCircle, MoreVertical, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { formatNaira } from "@/lib/currency";
 
 const initialsColors = [
   "bg-amber-100 text-amber-700",
@@ -23,9 +24,6 @@ const getInitialsColor = (name: string) => {
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
   return initialsColors[Math.abs(hash) % initialsColors.length];
 };
-
-const formatDollar = (amount: number) =>
-  "$" + Number(amount).toLocaleString("en-US", { minimumFractionDigits: 0 });
 
 const ProviderPatients = () => {
   const { user: authUser } = useAuth();
@@ -145,7 +143,7 @@ const ProviderPatients = () => {
         }),
       });
       // Also add notification for patient
-      toast({ title: `Bill of ${formatDollar(Number(billForm.amount))} added for ${selectedPatient.name}` });
+      toast({ title: `Bill of ${formatNaira(Number(billForm.amount))} added for ${selectedPatient.name}` });
       setShowBillModal(false);
       setBillForm({ amount: "", description: "", type: "", hospital: "" });
       fetchPatients();
@@ -226,7 +224,7 @@ const ProviderPatients = () => {
                         </td>
                         <td className="py-3 text-muted-foreground">{p.id}</td>
                         <td className="py-3 text-muted-foreground">{p.treatment}</td>
-                        <td className="py-3 font-semibold text-foreground">{formatDollar(Number(p.balance))}</td>
+                        <td className="py-3 font-semibold text-foreground">{formatNaira(Number(p.balance))}</td>
                         <td className="py-3">
                           <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${p.color}`}>
                             {p.status === "Active" ? (
@@ -260,7 +258,7 @@ const ProviderPatients = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-2 text-sm text-muted-foreground">
-            <span>Showing 1 to {filtered.length} of {patients.length > 100 ? "3,492" : patients.length} patients</span>
+            <span>Showing 1 to {filtered.length} of {patients.length} patients</span>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" disabled>Prev</Button>
               <Button variant="outline" size="sm">Next</Button>
@@ -353,7 +351,7 @@ const ProviderPatients = () => {
                 <Input placeholder="Brief description of the bill" required value={billForm.description} onChange={(e) => setBillForm((f) => ({ ...f, description: e.target.value }))} />
               </div>
               <div>
-                <Label>Amount ($)</Label>
+                <Label>Amount (₦)</Label>
                 <Input type="number" min="0" placeholder="0.00" required value={billForm.amount} onChange={(e) => setBillForm((f) => ({ ...f, amount: e.target.value }))} />
               </div>
             </div>
@@ -391,7 +389,7 @@ const ProviderPatients = () => {
                 </div>
                 <div className="bg-muted/50 rounded-lg p-3">
                   <p className="text-xs text-muted-foreground">Balance</p>
-                  <p className="font-semibold text-foreground text-sm">{formatDollar(Number(profilePatient.balance))}</p>
+                  <p className="font-semibold text-foreground text-sm">{formatNaira(Number(profilePatient.balance))}</p>
                 </div>
                 <div className="bg-muted/50 rounded-lg p-3">
                   <p className="text-xs text-muted-foreground">Status</p>
@@ -413,7 +411,7 @@ const ProviderPatients = () => {
                         <p className="text-xs text-muted-foreground">{bill.hospital} · {bill.date}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold">{formatDollar(Number(bill.amount))}</p>
+                        <p className="text-sm font-semibold">{formatNaira(Number(bill.amount))}</p>
                         <p className={`text-xs font-medium ${bill.statusColor || "text-muted-foreground"}`}>{bill.status}</p>
                       </div>
                     </div>

@@ -1,13 +1,16 @@
 
-import { CheckCircle2, XCircle, Receipt, ArrowUpRight } from "lucide-react";
+import { CheckCircle2, XCircle, Receipt, ArrowUpRight, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatNaira } from "@/lib/currency";
+import { Input } from "@/components/ui/input";
 
 const Transactions = () => {
   const { user: authUser } = useAuth();
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     if (!authUser) return;
@@ -34,6 +37,31 @@ const Transactions = () => {
         </span>
       </div>
 
+      {/* Search and Filter */}
+      {transactions.length > 0 && (
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by description or date..."
+              className="pl-10 rounded-full bg-muted border-0"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <select
+            className="px-4 py-2 rounded-full border border-border bg-card text-sm text-foreground"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">All Status</option>
+            <option value="Success">Success</option>
+            <option value="completed">Completed</option>
+            <option value="Failed">Failed</option>
+          </select>
+        </div>
+      )}
+
       <div className="bg-card rounded-2xl shadow-card overflow-hidden">
         {/* Header - hidden on mobile, show card layout instead */}
         <div className="hidden sm:grid grid-cols-4 gap-4 p-4 border-b border-border text-xs font-semibold text-muted-foreground uppercase">
@@ -47,8 +75,21 @@ const Transactions = () => {
             <p className="text-muted-foreground">No transactions found.</p>
             <p className="text-xs text-muted-foreground">Your payments will appear here once you make a payment.</p>
           </div>
-        ) : (
-          transactions.map((tx, i) => (
+        ) : (() => {
+          const q = searchQuery.toLowerCase();
+          const filtered = transactions.filter((tx) => {
+            const matchSearch = !q || (tx.desc || tx.description || "").toLowerCase().includes(q) || (tx.date || tx.createdAt || "").toLowerCase().includes(q);
+            const matchStatus = statusFilter === "all" || tx.status === statusFilter;
+            return matchSearch && matchStatus;
+          });
+          if (filtered.length === 0) {
+            return (
+              <div className="text-center py-16 text-muted-foreground">
+                No transactions match your search.
+              </div>
+            );
+          }
+          return filtered.map((tx, i) => (
             <div key={i} className="grid grid-cols-1 sm:grid-cols-4 gap-1 sm:gap-4 p-4 border-b border-border last:border-0 items-start sm:items-center hover:bg-muted/50 transition-colors">
               <div>
                 <span className="text-foreground font-medium text-sm">{tx.desc || tx.description}</span>
@@ -61,8 +102,8 @@ const Transactions = () => {
                 {tx.status}
               </span>
             </div>
-          ))
-        )}
+          ));
+        })()}
       </div>
     </div>
   );

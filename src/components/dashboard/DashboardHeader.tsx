@@ -3,8 +3,8 @@ import { Bell, HelpCircle, Search, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import avatarImg from "@/assets/avatar-jane.jpg";
 
 interface Props {
@@ -15,18 +15,24 @@ interface Props {
 const DashboardHeader = ({ onToggleSidebar, sidebarCollapsed }: Props) => {
   const { user: authUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);
   const initials = authUser?.name
     ? authUser.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
     : "U";
 
-  useEffect(() => {
+  const fetchUnreadCount = useCallback(() => {
     if (!authUser?._id) return;
     fetch(`/api/notifications?userId=${authUser._id}`)
       .then((res) => res.json())
       .then((data: any[]) => setUnreadCount(data.filter((n) => !n.read).length))
       .catch(() => setUnreadCount(0));
   }, [authUser]);
+
+  // Re-fetch notification count on route change (e.g. after marking as read on Notifications page)
+  useEffect(() => {
+    fetchUnreadCount();
+  }, [fetchUnreadCount, location.pathname]);
 
   return (
     <header className="h-16 border-b border-border flex items-center justify-between px-4 sm:px-6 bg-background sticky top-0 z-20">

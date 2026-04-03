@@ -3,89 +3,45 @@ import { http, HttpResponse } from 'msw';
 
 const API_URL = '/api';
 
-// In-memory mock data (mirrors db.json structure)
+// In-memory mock data — Patient data starts EMPTY for clean onboarding flow
 const db: Record<string, any[]> = {
   users: [
     { id: 1, _id: "demo-user-id", patientId: "PAT-10001", role: "patient", name: "Jane Doe", email: "jane@example.com", phone: "+2348012345678" },
     { id: 2, _id: "demo-provider-1", role: "provider", name: "Dr. Smith Hospital", email: "drsmith@example.com", phone: "+2348098765432" },
   ],
-  bills: [
-    {
-      id: 1, patientId: "demo-user-id", providerId: "demo-provider-1",
-      hospital: "Dr. Smith Hospital", type: "Surgery",
-      amount: 120000, description: "Surgery", ref: "BIL-001",
-      date: "2026-03-10", status: "Plan Active", statusColor: "text-primary",
-      action: "manage",
-      charges: [
-        { name: "Surgery", amount: 80000 },
-        { name: "Anesthesia", amount: 25000 },
-        { name: "Hospital Stay", amount: 15000 },
-      ],
-      activePlan: { months: 6, monthly: 21000 },
-    },
-    {
-      id: 2, patientId: "demo-user-id", providerId: "demo-provider-1",
-      hospital: "Lagos Medical Center", type: "Lab Work",
-      amount: 45000, description: "Lab Diagnostics", ref: "BIL-002",
-      date: "2026-03-20", status: "Unpaid", statusColor: "text-destructive",
-      action: "split",
-      charges: [
-        { name: "Blood Work", amount: 20000 },
-        { name: "Imaging", amount: 25000 },
-      ],
-    },
-  ],
-  paymentPlans: [
-    { id: 1, billId: 1, patientId: "demo-user-id", providerId: "demo-provider-1", totalAmount: 120000, installments: 6, frequency: "monthly", startDate: "2026-03-15", status: "active" },
-  ],
-  payments: [
-    { id: 1, planId: 1, amount: 20000, paidAt: "2026-03-16", status: "completed" },
-  ],
-  transactions: [
-    { id: 1, userId: "demo-user-id", amount: 20000, type: "debit", description: "Payment for Surgery", status: "completed", createdAt: "2026-03-16", date: "Mar 16, 2026" },
-    { id: 2, userId: "demo-user-id", amount: 15000, type: "debit", description: "Lab Diagnostics Deposit", status: "completed", createdAt: "2026-03-18", date: "Mar 18, 2026" },
-    { id: 3, userId: "demo-user-id", amount: 21000, type: "debit", description: "Surgery Plan - Month 2", status: "Success", createdAt: "2026-04-15", date: "Apr 15, 2026" },
-  ],
-  notifications: [
-    { id: 1, userId: "demo-user-id", title: "Payment Successful", icon: "CheckCircle2", message: "Your payment of ₦20,000 was successful.", read: false, createdAt: "2026-03-16", time: "2 hours ago" },
-    { id: 2, userId: "demo-user-id", title: "Payment Reminder", icon: "Bell", message: "Your next payment of ₦21,000 is due on Apr 15.", read: false, createdAt: "2026-04-10", time: "1 day ago" },
-    { id: 3, userId: "demo-user-id", title: "New Bill Added", icon: "AlertCircle", message: "A new bill of ₦45,000 from Lagos Medical Center has been added.", read: true, createdAt: "2026-03-20", time: "Mar 20" },
-    { id: 4, userId: "demo-provider-1", title: "New Patient Enrolled", icon: "CheckCircle2", message: "Jane Doe has enrolled in a 6-month plan.", read: false, createdAt: "2026-03-15", time: "Mar 15" },
-  ],
-  activities: [
-    { id: 1, userId: "demo-user-id", desc: "Payment received", date: "Mar 16, 2026", amount: 20000, color: "text-green-success" },
-    { id: 2, userId: "demo-user-id", desc: "Payment plan activated", date: "6-month plan started", amount: null, color: "text-primary" },
-    { id: 3, userId: "demo-user-id", desc: "Payment received", date: "Mar 18, 2026", amount: 15000, color: "text-green-success" },
-  ],
-  // Provider-specific data
-  providerStats: [
-    { label: "Total Revenue Collected", value: "$842,500.00", icon: "DollarSign", color: "bg-blue-100 text-blue-600", change: "+12.5%", up: true },
-    { label: "Active Payment Plans", value: "1,248", icon: "LineChart", color: "bg-green-100 text-green-600", change: "+5.2%", up: true },
-    { label: "Outstanding Payments", value: "$145,200.00", icon: "TrendingUp", color: "bg-blue-100 text-blue-600", change: "-2.4%", up: false, subtitle: "Decreased from last month" },
-    { label: "Total Patients Enrolled", value: "3,492", icon: "Users", color: "bg-purple-100 text-purple-600", change: "+18%", up: true },
-  ],
-  providerActionItems: [
-    { name: "Michael Chang", dot: "bg-destructive", time: "2 hrs ago", desc: "Missed 2nd installment payment", amount: "$450.00" },
-    { name: "Sarah Jenkins", dot: "bg-orange-500", time: "5 hrs ago", desc: "Hardship pause request submitted", amount: "Plan: $1,200" },
-    { name: "David Miller", dot: "bg-destructive", time: "1 day ago", desc: "Card expired before next payment", amount: "Due in 3 days" },
-    { name: "Emily Clark", dot: "bg-orange-500", time: "2 days ago", desc: "Requested early payoff settlement", amount: "$2,100.00" },
-  ],
-  providerTransactions: [
-    { patient: "Robert Fox", plan: "Orthopedic Surgery", amount: 350, date: "Today, 10:24 AM", status: "Success" },
-    { patient: "Wade Warren", plan: "Emergency Visit", amount: 120, date: "Today, 09:15 AM", status: "Success" },
-    { patient: "Jane Cooper", plan: "Maternity Care", amount: 500, date: "Yesterday", status: "Processing" },
-    { patient: "Esther Howard", plan: "Physical Therapy", amount: 85, date: "Yesterday", status: "Failed" },
-  ],
-  providerPatients: [
-    { id: "P-10024", _id: "pat-robert", name: "Robert Fox", initials: "RF", email: "robert@example.com", phone: "(555) 019-2834", treatment: "Orthopedic Surgery", balance: 4200, status: "Active", color: "text-green-600" },
-    { id: "P-10025", _id: "pat-wade", name: "Wade Warren", initials: "WW", email: "wade@example.com", phone: "(555) 019-2835", treatment: "Emergency Visit", balance: 1500, status: "Active", color: "text-green-600" },
-    { id: "P-10026", _id: "pat-jane-c", name: "Jane Cooper", initials: "JC", email: "jane.c@example.com", phone: "(555) 019-2836", treatment: "Maternity Care", balance: 8400, status: "Active", color: "text-green-600" },
-    { id: "P-10027", _id: "pat-esther", name: "Esther Howard", initials: "EH", email: "esther@example.com", phone: "(555) 019-2837", treatment: "Physical Therapy", balance: 850, status: "At Risk", color: "text-destructive" },
-    { id: "P-10028", _id: "pat-michael", name: "Michael Chang", initials: "MC", email: "michael@example.com", phone: "(555) 019-2838", treatment: "Cardiology", balance: 2100, status: "At Risk", color: "text-destructive" },
-    { id: "P-10029", _id: "pat-sarah", name: "Sarah Jenkins", initials: "SJ", email: "sarah@example.com", phone: "(555) 019-2839", treatment: "Oncology", balance: 5500, status: "Paused", color: "text-orange-500" },
-    { id: "P-10030", _id: "pat-david", name: "David Miller", initials: "DM", email: "david@example.com", phone: "(555) 019-2840", treatment: "Neurology", balance: 3200, status: "Active", color: "text-green-600" },
-  ],
+  // Patient data starts empty — bills arrive when provider creates them
+  bills: [],
+  paymentPlans: [],
+  payments: [],
+  transactions: [],
+  notifications: [],
+  activities: [],
+  // Provider-specific data — starts EMPTY for empty state
+  providerPatients: [],
+  providerTransactions: [],
+  providerActionItems: [],
 };
+
+// Helper: compute provider stats dynamically from enrolled patients & bills
+function computeProviderStats() {
+  const totalPatients = db.providerPatients.length;
+  const enrolledIds = db.providerPatients.map((p: any) => p._id);
+  const providerBills = db.bills.filter((b: any) => enrolledIds.includes(b.patientId));
+  const activePlans = providerBills.filter((b: any) => b.activePlan).length;
+  const totalCollected = db.providerTransactions
+    .filter((t: any) => t.status === "Success" || t.status === "completed")
+    .reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0);
+  const totalOutstanding = providerBills
+    .filter((b: any) => b.status !== "Paid in Full")
+    .reduce((sum: number, b: any) => sum + Number(b.amount || 0), 0);
+
+  return [
+    { label: "Total Revenue Collected", value: `₦${totalCollected.toLocaleString("en-NG")}`, icon: "DollarSign", color: "bg-blue-100 text-blue-600", change: totalCollected > 0 ? "+12.5%" : "0%", up: totalCollected > 0 },
+    { label: "Active Payment Plans", value: String(activePlans), icon: "LineChart", color: "bg-green-100 text-green-600", change: activePlans > 0 ? "+5.2%" : "0%", up: activePlans > 0 },
+    { label: "Outstanding Payments", value: `₦${totalOutstanding.toLocaleString("en-NG")}`, icon: "TrendingUp", color: "bg-blue-100 text-blue-600", change: totalOutstanding > 0 ? "-2.4%" : "0%", up: false, subtitle: totalOutstanding > 0 ? "Decreased from last month" : "" },
+    { label: "Total Patients Enrolled", value: String(totalPatients), icon: "Users", color: "bg-purple-100 text-purple-600", change: totalPatients > 0 ? "+18%" : "0%", up: totalPatients > 0 },
+  ];
+}
 
 export const handlers = [
   // Register (signup)
@@ -186,6 +142,32 @@ export const handlers = [
     const body = await request.json() as any;
     const newBill = { id: db.bills.length + 1, ...body };
     db.bills.push(newBill);
+
+    // Auto-create notification for the patient
+    const billPatient = db.users.find((u: any) => u._id === body.patientId);
+    if (billPatient) {
+      const amt = Number(body.amount || 0);
+      db.notifications.push({
+        id: db.notifications.length + 1,
+        userId: body.patientId,
+        title: "New Bill Added",
+        icon: "AlertCircle",
+        message: `A new bill of ₦${amt.toLocaleString("en-NG")} from ${body.hospital || "your provider"} has been added.`,
+        read: false,
+        createdAt: new Date().toISOString().split("T")[0],
+        time: "Just now",
+      });
+    }
+
+    // Auto-create provider transaction entry
+    db.providerTransactions.push({
+      patient: billPatient?.name || body.patientName || "Unknown",
+      plan: body.type || body.description || "Medical Service",
+      amount: Number(body.amount || 0),
+      date: new Date().toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      status: "Success",
+    });
+
     return HttpResponse.json(newBill, { status: 201 });
   }),
 
@@ -223,7 +205,7 @@ export const handlers = [
 
   // Provider-specific endpoints
   http.get(`${API_URL}/providers/:id/stats`, () => {
-    return HttpResponse.json(db.providerStats);
+    return HttpResponse.json(computeProviderStats());
   }),
   http.get(`${API_URL}/providers/:id/actionItems`, () => {
     return HttpResponse.json(db.providerActionItems);
@@ -243,6 +225,11 @@ export const handlers = [
     if (exists) {
       return HttpResponse.json(exists);
     }
+    // Find existing bills for this patient to compute balance
+    const patientBills = db.bills.filter((b: any) => b.patientId === body._id);
+    const balance = patientBills.reduce((s: number, b: any) => s + (b.status === "Paid in Full" ? 0 : Number(b.amount || 0)), 0);
+    const hasActivePlan = patientBills.some((b: any) => b.activePlan);
+
     const newPatient: any = {
       id: body.patientId || `PAT-${10000 + db.providerPatients.length + 1}`,
       _id: body._id,
@@ -250,12 +237,25 @@ export const handlers = [
       initials: body.name ? body.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2) : "?",
       email: body.email || "",
       phone: body.phone || "",
-      treatment: "Pending Assessment",
-      balance: 0,
-      status: "Pending",
-      color: "text-orange-500",
+      treatment: patientBills.length > 0 ? patientBills[0].type || "Medical Service" : "Pending Assessment",
+      balance,
+      status: hasActivePlan ? "Active" : balance > 0 ? "Pending" : "Active",
+      color: hasActivePlan ? "text-green-600" : balance > 0 ? "text-orange-500" : "text-green-600",
     };
     db.providerPatients.push(newPatient);
+
+    // Add notification for provider
+    db.notifications.push({
+      id: db.notifications.length + 1,
+      userId: String(body.providerId || "demo-provider-1"),
+      title: "New Patient Enrolled",
+      icon: "CheckCircle2",
+      message: `${body.name} has been enrolled successfully.`,
+      read: false,
+      createdAt: new Date().toISOString().split("T")[0],
+      time: "Just now",
+    });
+
     return HttpResponse.json(newPatient, { status: 201 });
   }),
 
@@ -269,5 +269,209 @@ export const handlers = [
       });
     }
     return HttpResponse.json({ success: true });
+  }),
+
+  // Clear notifications for user
+  http.delete(`${API_URL}/notifications`, ({ request }) => {
+    const url = new URL(request.url);
+    const userId = url.searchParams.get('userId');
+    if (userId) {
+      db.notifications = db.notifications.filter((n: any) => n.userId !== userId);
+    }
+    return HttpResponse.json({ success: true });
+  }),
+
+  // Pause a bill
+  http.post(`${API_URL}/bills/:id/pause`, async ({ params, request }) => {
+    const body = await request.json() as any;
+    const bill = db.bills.find(b => b.id === Number(params.id));
+    if (!bill) return new HttpResponse(null, { status: 404 });
+    bill.status = "Paused";
+    bill.statusColor = "text-orange-warning";
+    bill.pauseDays = body.days || 30;
+    bill.pausedAt = new Date().toISOString();
+
+    // Add notification
+    db.notifications.push({
+      id: db.notifications.length + 1,
+      userId: bill.patientId,
+      title: "Payment Paused",
+      icon: "AlertCircle",
+      message: `Your payment plan for ${bill.hospital} has been paused for ${body.days || 30} days.`,
+      read: false,
+      createdAt: new Date().toISOString().split("T")[0],
+      time: "Just now",
+    });
+
+    // Add activity
+    db.activities.push({
+      id: db.activities.length + 1,
+      userId: bill.patientId,
+      desc: `Payment paused for ${body.days || 30} days`,
+      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      amount: null,
+      color: "text-orange-warning",
+    });
+
+    return HttpResponse.json(bill);
+  }),
+
+  // Resume (undo pause) a bill
+  http.post(`${API_URL}/bills/:id/resume`, async ({ params }) => {
+    const bill = db.bills.find(b => b.id === Number(params.id));
+    if (!bill) return new HttpResponse(null, { status: 404 });
+    bill.status = bill.activePlan ? "Plan Active" : "Unpaid";
+    bill.statusColor = bill.activePlan ? "text-primary" : "text-destructive";
+    delete bill.pauseDays;
+    delete bill.pausedAt;
+    return HttpResponse.json(bill);
+  }),
+
+  // Adjust a bill's plan
+  http.post(`${API_URL}/bills/:id/adjust`, async ({ params, request }) => {
+    const body = await request.json() as any;
+    const bill = db.bills.find(b => b.id === Number(params.id));
+    if (!bill) return new HttpResponse(null, { status: 404 });
+    const newMonths = body.months;
+    const newMonthly = Math.round(bill.amount / newMonths);
+    bill.activePlan = { months: newMonths, monthly: newMonthly };
+    bill.status = "Plan Active";
+    bill.statusColor = "text-primary";
+    bill.action = "manage";
+
+    // Update payment plan
+    const existingPlan = db.paymentPlans.find(p => p.billId === bill.id);
+    if (existingPlan) {
+      existingPlan.installments = newMonths;
+    }
+
+    // Add notification
+    db.notifications.push({
+      id: db.notifications.length + 1,
+      userId: bill.patientId,
+      title: "Payment Plan Adjusted",
+      icon: "CheckCircle2",
+      message: `Your plan for ${bill.hospital} has been adjusted to ${newMonths} months at ₦${newMonthly.toLocaleString("en-NG")}/month.`,
+      read: false,
+      createdAt: new Date().toISOString().split("T")[0],
+      time: "Just now",
+    });
+
+    db.activities.push({
+      id: db.activities.length + 1,
+      userId: bill.patientId,
+      desc: `Plan adjusted to ${newMonths} months`,
+      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      amount: null,
+      color: "text-primary",
+    });
+
+    return HttpResponse.json(bill);
+  }),
+
+  // Create a payment (records transaction + updates bill)
+  http.post(`${API_URL}/payments`, async ({ request }) => {
+    const body = await request.json() as any;
+    const payment = {
+      id: db.payments.length + 1,
+      planId: body.planId || null,
+      billId: body.billId || null,
+      amount: Number(body.amount),
+      paidAt: new Date().toISOString(),
+      status: "completed",
+    };
+    db.payments.push(payment);
+
+    // Record transaction
+    const dateStr = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    db.transactions.push({
+      id: db.transactions.length + 1,
+      userId: body.userId,
+      amount: Number(body.amount),
+      type: "debit",
+      description: body.description || "Payment",
+      status: "completed",
+      createdAt: new Date().toISOString().split("T")[0],
+      date: dateStr,
+    });
+
+    // Add notification
+    db.notifications.push({
+      id: db.notifications.length + 1,
+      userId: body.userId,
+      title: "Payment Successful",
+      icon: "CheckCircle2",
+      message: `We received your payment of ₦${Number(body.amount).toLocaleString("en-NG")}. Thank you!`,
+      read: false,
+      createdAt: new Date().toISOString().split("T")[0],
+      time: "Just now",
+    });
+
+    // Add activity
+    db.activities.push({
+      id: db.activities.length + 1,
+      userId: body.userId,
+      desc: "Payment received",
+      date: dateStr,
+      amount: Number(body.amount),
+      color: "text-green-success",
+    });
+
+    return HttpResponse.json(payment, { status: 201 });
+  }),
+
+  // Activate a payment plan for a bill (from PaymentPlans page step completion)
+  http.post(`${API_URL}/bills/:id/activate-plan`, async ({ params, request }) => {
+    const body = await request.json() as any;
+    const bill = db.bills.find(b => b.id === Number(params.id));
+    if (!bill) return new HttpResponse(null, { status: 404 });
+    const months = body.months;
+    const monthly = Math.round(bill.amount / months);
+    bill.activePlan = { months, monthly };
+    bill.status = "Plan Active";
+    bill.statusColor = "text-primary";
+    bill.action = "manage";
+
+    // Create or update payment plan record
+    const existingPlan = db.paymentPlans.find(p => p.billId === bill.id);
+    if (existingPlan) {
+      existingPlan.installments = months;
+      existingPlan.totalAmount = bill.amount;
+    } else {
+      db.paymentPlans.push({
+        id: db.paymentPlans.length + 1,
+        billId: bill.id,
+        patientId: bill.patientId,
+        providerId: bill.providerId,
+        totalAmount: bill.amount,
+        installments: months,
+        frequency: "monthly",
+        startDate: new Date().toISOString().split("T")[0],
+        status: "active",
+      });
+    }
+
+    // Notification
+    db.notifications.push({
+      id: db.notifications.length + 1,
+      userId: bill.patientId,
+      title: "Payment Plan Activated",
+      icon: "CheckCircle2",
+      message: `Your ${months}-month plan for ${bill.hospital} is now active. Monthly payment: ₦${monthly.toLocaleString("en-NG")}.`,
+      read: false,
+      createdAt: new Date().toISOString().split("T")[0],
+      time: "Just now",
+    });
+
+    db.activities.push({
+      id: db.activities.length + 1,
+      userId: bill.patientId,
+      desc: `${months}-month payment plan activated`,
+      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      amount: null,
+      color: "text-primary",
+    });
+
+    return HttpResponse.json(bill);
   }),
 ];

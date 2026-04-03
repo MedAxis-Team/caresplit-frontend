@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Users, FileText, CreditCard, LineChart, Bell, Settings, LogOut, Menu, ChevronLeft, Search, HelpCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,7 @@ const baseNavItems = [
 ];
 
 const ProviderLayout = () => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(typeof window !== "undefined" && window.innerWidth < 1024);
   const location = useLocation();
   const navigate = useNavigate();
   const { user: authUser } = useAuth();
@@ -26,9 +26,8 @@ const ProviderLayout = () => {
   const initials = providerName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
 
   const [unreadCount, setUnreadCount] = useState(0);
-  const [managePlansCount] = useState(3);
 
-  useEffect(() => {
+  const fetchUnreadCount = useCallback(() => {
     if (!authUser?._id) return;
     fetch(`/api/notifications?userId=${authUser._id}`)
       .then((res) => res.json())
@@ -36,13 +35,16 @@ const ProviderLayout = () => {
       .catch(() => setUnreadCount(0));
   }, [authUser]);
 
+  // Re-fetch on route change so marking notifications as read syncs the badge
+  useEffect(() => {
+    fetchUnreadCount();
+  }, [fetchUnreadCount, location.pathname]);
+
   const navItems = baseNavItems.map((item) => ({
     ...item,
     badge:
       item.label === "Notifications" && unreadCount > 0
         ? unreadCount
-        : item.label === "Manage Plans" && managePlansCount > 0
-        ? managePlansCount
         : undefined,
   }));
 

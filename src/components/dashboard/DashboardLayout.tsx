@@ -4,7 +4,7 @@ import DashboardSidebar from "./DashboardSidebar";
 import DashboardHeader from "./DashboardHeader";
 
 const DashboardLayout = () => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(typeof window !== "undefined" && window.innerWidth < 1024);
 
   return (
     <div className="min-h-screen bg-muted/30">

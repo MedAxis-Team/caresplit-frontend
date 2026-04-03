@@ -5,10 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const ProviderCarePlans = () => {
   const navigate = useNavigate();
+  const { user: authUser } = useAuth();
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
+  const [sending, setSending] = useState(false);
   const [form, setForm] = useState({
     patientName: "",
     patientId: "",
@@ -177,7 +182,7 @@ const ProviderCarePlans = () => {
                     <Label className="text-sm font-semibold">Total Patient Responsibility</Label>
                     <div className="relative mt-1.5">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
-                        $
+                        ₦
                       </span>
                       <Input
                         type="number"
@@ -218,8 +223,8 @@ const ProviderCarePlans = () => {
                 <div className="bg-muted/30 rounded-xl p-6 flex flex-col justify-between border border-border">
                   <div>
                     <p className="text-3xl sm:text-4xl font-bold text-primary">
-                      $
-                      {monthly.toLocaleString("en-US", {
+                      ₦
+                      {monthly.toLocaleString("en-NG", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}
@@ -230,13 +235,13 @@ const ProviderCarePlans = () => {
                       <span className="text-green-600 font-semibold">0% APR</span>
                     </div>
                     <div className="flex items-center justify-end text-sm">
-                      <span className="text-muted-foreground">$0.00</span>
+                      <span className="text-muted-foreground">₦0.00</span>
                     </div>
                     <div className="flex items-center justify-between text-sm font-semibold">
                       <span>Total Recovery</span>
                       <span>
-                        $
-                        {totalRecovery.toLocaleString("en-US", {
+                        ₦
+                        {totalRecovery.toLocaleString("en-NG", {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}
@@ -290,13 +295,13 @@ const ProviderCarePlans = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Total Bill</span>
                     <span className="text-lg font-bold text-foreground">
-                      ${form.totalAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                      ₦{form.totalAmount.toLocaleString("en-NG", { minimumFractionDigits: 2 })}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-primary font-semibold">Proposed Terms</span>
                     <span className="text-sm text-primary font-semibold">
-                      ${monthly.toLocaleString("en-US", { minimumFractionDigits: 2 })}/mo for{" "}
+                      ₦{monthly.toLocaleString("en-NG", { minimumFractionDigits: 2 })}/mo for{" "}
                       {form.installmentMonths} mos
                     </span>
                   </div>
@@ -319,8 +324,46 @@ const ProviderCarePlans = () => {
                 >
                   Edit Details
                 </button>
-                <Button onClick={() => setStep(4)} className="gap-2">
-                  <Send className="h-4 w-4" /> Send Proposal
+                <Button
+                  onClick={async () => {
+                    setSending(true);
+                    try {
+                      // Search for the patient by name/id to get their _id
+                      const searchRes = await fetch(`/api/patients/search?q=${encodeURIComponent(form.patientName.trim())}`);
+                      const patients = await searchRes.json();
+                      const patientId = patients?.[0]?._id || "demo-user-id";
+
+                      // Create a bill for the patient via the API
+                      await fetch("/api/bills", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          patientId,
+                          providerId: authUser?._id || "demo-provider-1",
+                          hospital: authUser?.name || "Provider Hospital",
+                          type: form.treatment,
+                          description: form.treatment,
+                          amount: form.totalAmount,
+                          ref: `BIL-${String(Date.now()).slice(-4)}`,
+                          date: new Date().toISOString().split("T")[0],
+                          status: "Unpaid",
+                          statusColor: "text-destructive",
+                          action: "split",
+                          charges: [{ name: form.treatment, amount: form.totalAmount }],
+                        }),
+                      });
+
+                      toast({ title: `Care plan sent to ${form.patientName}!` });
+                      setStep(4);
+                    } catch {
+                      toast({ title: "Failed to send care plan", variant: "destructive" });
+                    }
+                    setSending(false);
+                  }}
+                  className="gap-2"
+                  disabled={sending}
+                >
+                  <Send className="h-4 w-4" /> {sending ? "Sending..." : "Send Proposal"}
                 </Button>
               </div>
             </div>

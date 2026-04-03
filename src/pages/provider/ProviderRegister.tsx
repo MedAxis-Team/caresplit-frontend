@@ -22,7 +22,7 @@ const ProviderRegister = () => {
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.hospital || !form.email || !form.password || !form.confirm) {
       toast({ title: "Please fill all required fields", variant: "destructive" });
@@ -33,25 +33,21 @@ const ProviderRegister = () => {
       return;
     }
     setLoading(true);
-    try {
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: form.contact, email: form.email, phone: form.phone, role: 'provider' }),
-      });
-      const user = await res.json();
-      login({
-        ...user,
+    setTimeout(() => {
+      // Simulate provider user data; in real app, fetch from API
+      const user = {
+        _id: "demo-provider-1",
+        name: form.contact,
+        email: form.email,
+        phone: form.phone,
         hospital: form.hospital,
         address: form.address,
-        role: user.role as "provider" | "patient",
-      });
+        role: "provider",
+      };
+      login({ ...user, role: user.role as "provider" | "patient" });
       navigate("/verify-otp", { state: { email: form.email, redirectTo: "/provider/dashboard" } });
-    } catch {
-      toast({ title: "Registration failed. Please try again.", variant: "destructive" });
-    } finally {
       setLoading(false);
-    }
+    }, 500);
   };
 
   return (

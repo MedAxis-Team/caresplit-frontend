@@ -10,8 +10,8 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const fallbackPlans = [
   { months: 3, monthly: 40000, total: 120000, interest: "0% Interest", popular: false },
-  { months: 6, monthly: 21000, total: 126000, interest: "5% Interest", popular: true },
-  { months: 12, monthly: 11200, total: 134400, interest: "12% Interest", popular: false },
+  { months: 6, monthly: 20000, total: 120000, interest: "0% Interest", popular: true },
+  { months: 12, monthly: 10000, total: 120000, interest: "0% Interest", popular: false },
 ];
 
 const PaymentPlans = () => {
@@ -26,36 +26,57 @@ const PaymentPlans = () => {
   const [loading, setLoading] = useState(false);
   const [plans, setPlans] = useState<any[]>(fallbackPlans);
   const [loadingPlans, setLoadingPlans] = useState(false);
+  const [billsArr, setBillsArr] = useState<any[]>([]);
 
   useEffect(() => {
     if (!authUser) return;
     setLoadingPlans(true);
-    fetch(`/api/paymentPlans?patientId=${authUser._id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setPlans(data.map((p: any) => ({
-            months: p.installments || p.months || 6,
-            monthly: Math.round((p.totalAmount || p.total || 0) / (p.installments || p.months || 6)),
-            total: p.totalAmount || p.total || 0,
-            interest: p.interest || "0% Interest",
-            popular: p.popular || false,
-          })));
-        }
-      })
-      .catch(() => { /* keep fallback plans */ })
-      .finally(() => setLoadingPlans(false));
+    Promise.all([
+      fetch(`/api/paymentPlans?patientId=${authUser._id}`).then(r => r.json()).catch(() => []),
+      fetch(`/api/bills?patientId=${authUser._id}`).then(r => r.json()).catch(() => []),
+    ]).then(([data, bills]) => {
+      setBillsArr(bills);
+      // Compute total from bills for plan calculations
+      const totalFromBills = bills.reduce((s: number, b: any) => s + (b.status === "Paid in Full" ? 0 : Number(b.amount || 0)), 0);
+      const totalAmt = totalFromBills > 0 ? totalFromBills : (data.length > 0 ? (data[0]?.totalAmount || 120000) : 120000);
+      setPlans([
+        { months: 3, monthly: Math.round(totalAmt / 3), total: totalAmt, interest: "0% Interest", popular: false },
+        { months: 6, monthly: Math.round(totalAmt / 6), total: totalAmt, interest: "0% Interest", popular: true },
+        { months: 12, monthly: Math.round(totalAmt / 12), total: totalAmt, interest: "0% Interest", popular: false },
+      ]);
+    }).finally(() => setLoadingPlans(false));
   }, [authUser]);
 
   const plan = plans[selected] || {};
 
   const handleContinue = () => setStep(2);
 
-  const handleAuthorize = () => {
+  const handleAuthorize = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setStep(3);
+    try {
+      // Activate plan on first applicable bill
+      const targetBill = billsArr.find((b: any) => b.status !== "Paid in Full" && b.status !== "Plan Active");
+      if (targetBill && authUser) {
+        await fetch(`/api/bills/${targetBill.id}/activate-plan`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ months: plan.months }),
+        });
+        // Record first payment
+        await fetch("/api/payments", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            billId: targetBill.id,
+            userId: authUser._id,
+            amount: plan.monthly,
+            description: `${targetBill.hospital || "Hospital"} - ${plan.months}-month plan payment`,
+          }),
+        });
+      }
+    } catch { /* continue to confirmation */ }
+    setLoading(false);
+    setStep(3);
     }, 1500);
   };
 
@@ -242,7 +263,7 @@ const PaymentPlans = () => {
             <div className="bg-secondary/60 border border-primary/20 rounded-2xl p-4 flex items-start gap-3 mb-6">
               <Shield className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <p className="text-sm text-primary">
-                By confirming, you authorize CareSplit to automatically deduct <strong>${plan.monthly.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 3 })}</strong> monthly on the 15th of each month for {plan.months} months.
+                By confirming, you authorize CareSplit to automatically deduct <strong>₦{plan.monthly?.toLocaleString("en-NG")}</strong> monthly on the 15th of each month for {plan.months} months.
               </p>
             </div>
 
@@ -278,7 +299,7 @@ const PaymentPlans = () => {
           <div className="border border-border rounded-2xl p-6 w-full max-w-sm text-left space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground text-sm">Monthly Deduction</span>
-              <span className="font-bold text-foreground text-lg">${plan.monthly.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 3 })}</span>
+              <span className="font-bold text-foreground text-lg">₦{plan.monthly?.toLocaleString("en-NG")}</span>
             </div>
             <hr className="border-border" />
             <div className="flex items-center justify-between">
@@ -314,9 +335,9 @@ const PaymentPlans = () => {
                 <p className="text-xs font-semibold text-primary mb-3">Payment Successful</p>
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between"><span className="text-muted-foreground">Hospital</span><span className="text-foreground font-medium">Memorial General</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Bill Amount</span><span className="text-foreground font-medium">${plan.total.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Bill Amount</span><span className="text-foreground font-medium">₦{plan.total?.toLocaleString("en-NG")}</span></div>
                   <div className="flex justify-between"><span className="text-muted-foreground">Plan</span><span className="text-foreground font-medium">{plan.months}-Month Installment</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Monthly</span><span className="text-foreground font-medium">${plan.monthly.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 3 })}/mo</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Monthly</span><span className="text-foreground font-medium">₦{plan.monthly?.toLocaleString("en-NG")}/mo</span></div>
                 </div>
               </div>
             </div>

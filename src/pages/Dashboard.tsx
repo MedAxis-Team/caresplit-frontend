@@ -5,13 +5,10 @@ import {
   DollarSign,
   CheckCircle2,
   Calendar,
-  TrendingDown,
   CreditCard,
-  BarChart3,
   Receipt,
   Phone,
   ArrowUpRight,
-  Sparkles,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import dashboardCard from "@/assets/dashboard-card.png";
@@ -69,7 +66,7 @@ const Dashboard = () => {
   const formatCurrency = (n: number) => formatNaira(n);
 
   const activePlan = billsArr.find((b: any) => b.status === "Plan Active" && b.activePlan)?.activePlan || null;
-  const firstName = authUser?.name ? authUser.name.split(" ")[0] : "User";
+  const firstName = authUser?.name ? authUser.name.split(" ")[0] : "Jane";
   const [selectedPlanMonths, setSelectedPlanMonths] = useState<number>(activePlan?.months || 3);
 
   useEffect(() => {
@@ -77,6 +74,7 @@ const Dashboard = () => {
     if (activePlan && activePlan.months) setSelectedPlanMonths(activePlan.months);
   }, [activePlan]);
 
+  // fallback sample transactions removed — show empty state when no real data
   const txList = transactions;
 
   return (
@@ -84,10 +82,7 @@ const Dashboard = () => {
       {/* Hero Banner */}
       <div className="relative gradient-hero rounded-2xl p-5 sm:p-8 text-primary-foreground overflow-hidden min-h-[160px] sm:min-h-[180px] flex items-center">
         <div className="relative z-10 max-w-lg">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1">Hello, {firstName}</h1>
-          {authUser?.patientId && (
-            <p className="text-primary-foreground/70 text-xs mb-2 font-mono">Patient ID: {authUser.patientId}</p>
-          )}
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2">Hello, {firstName}</h1>
           <p className="text-primary-foreground/80 max-w-md text-xs sm:text-sm mb-4">
             {bill === 0
               ? "Your health finances are looking healthy. Add a bill to get started."
@@ -131,10 +126,10 @@ const Dashboard = () => {
             <Progress value={bill ? (paid / bill) * 100 : 0} className="h-2 mb-4" />
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-6">
               <div className="flex items-center gap-2 text-xs sm:text-sm">
-                <span className="w-3 h-3 rounded-full bg-primary flex-shrink-0" /> Medical Fees <span className="text-muted-foreground">{formatCurrency(Math.round((bill * 0.78) || 1240))} · 78%</span>
+                <span className="w-3 h-3 rounded-full bg-primary flex-shrink-0" /> Medical Fees <span className="text-muted-foreground">{formatCurrency(bill)} · 100%</span>
               </div>
               <div className="flex items-center gap-2 text-xs sm:text-sm">
-                <span className="w-3 h-3 rounded-full bg-purple-glow flex-shrink-0" /> Platform Interest <span className="text-muted-foreground">{formatCurrency(Math.round((bill * 0.22) || 352))} · 22%</span>
+                <span className="w-3 h-3 rounded-full bg-purple-glow flex-shrink-0" /> Platform Interest <span className="text-muted-foreground">{formatCurrency(0)} · 0%</span>
               </div>
             </div>
           </div>
@@ -147,7 +142,7 @@ const Dashboard = () => {
             </div>
             <div className="space-y-4">
               {txList.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">No transactions yet</p>
+                <div className="text-center py-8 text-muted-foreground text-sm">No transactions yet. Your payments will appear here.</div>
               ) : txList.slice(0, 8).map((tx: any, idx: number) => {
                   const IconComp = tx.icon || Receipt;
                   return (
@@ -163,7 +158,7 @@ const Dashboard = () => {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-semibold text-foreground">{formatCurrency(Number(tx.amount || 0))}</p>
-                      <p className="text-xs text-green-success font-medium">{tx.status || "Completed"}</p>
+                      <p className="text-xs text-green-success font-medium">Verified</p>
                     </div>
                   </div>
                   )
@@ -199,11 +194,11 @@ const Dashboard = () => {
                 <Calendar className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-semibold text-foreground">Extended Care</p>
-                  <p className="text-xs text-muted-foreground">2.5% APR · 12 MONTHS</p>
+                  <p className="text-xs text-muted-foreground">0% APR · 12 MONTHS</p>
                 </div>
               </div>
               <div className="flex items-center justify-between mt-2">
-                <p className="text-lg font-bold text-foreground">{formatCurrency(bill ? ((bill * 1.025) / 12) : 0)} <span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+                <p className="text-lg font-bold text-foreground">{formatCurrency(bill ? (bill / 12) : 0)} <span className="text-sm font-normal text-muted-foreground">/mo</span></p>
                 <Button variant="outline" size="sm" className="rounded-full text-xs" onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/payment-plans?selected=12`); }}>Select</Button>
               </div>
             </div>
@@ -231,7 +226,9 @@ const Dashboard = () => {
               <button onClick={() => navigate('/dashboard/notifications')} className="text-xs text-primary hover:underline">View all</button>
             </div>
             <div className="space-y-4">
-              {activities && activities.length > 0 ? activities.slice(0, 3).map((a: any, i: number) => (
+              {activities.length === 0 ? (
+                <p className="text-center py-4 text-muted-foreground text-sm">No recent activity.</p>
+              ) : (activities.slice(0, 3)).map((a: any, i: number) => (
                 <div key={i} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <CheckCircle2 className={`h-5 w-5 ${a.color}`} />
@@ -242,9 +239,7 @@ const Dashboard = () => {
                   </div>
                   {a.amount && <p className="text-sm font-semibold text-foreground">{formatCurrency(a.amount)}</p>}
                 </div>
-              )) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
-              )}
+              ))}
             </div>
           </div>
         </div>

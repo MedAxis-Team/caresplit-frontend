@@ -20,34 +20,17 @@ const Login = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      if (!email || !password) {
-        toast({ title: "Please enter email and password", variant: "destructive" });
-        return;
-      }
       setLoading(true);
       try {
-        // Fetch users from mock API and match by email
-        const res = await fetch('/api/users');
-        const users = await res.json();
-        const matchedUser = users.find((u: any) => u.email === email);
-
-        const userData = matchedUser
-          ? {
-              _id: matchedUser._id,
-              name: matchedUser.name,
-              email: matchedUser.email,
-              phone: matchedUser.phone,
-              role: matchedUser.role as "provider" | "patient",
-              token: "demo-token",
-            }
-          : {
-              _id: "demo-user-id",
-              name: email.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()),
-              email,
-              role: (email.includes("provider") ? "provider" : "patient") as "provider" | "patient",
-              token: "demo-token",
-            };
-        await login(userData);
+        // Simulate authentication for demo/mock backend
+        const userData = {
+          _id: "demo-user-id",
+          name: "Demo User",
+          email,
+          role: email.includes("provider") ? "provider" : "patient",
+          token: "demo-token",
+        };
+        await login({ ...userData, role: userData.role as "provider" | "patient" });
         navigate("/dashboard");
       } catch (err: any) {
         toast({ title: "Login failed", description: err?.message || "Invalid credentials", variant: "destructive" });

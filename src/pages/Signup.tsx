@@ -1,27 +1,26 @@
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import CareSplitLogo from "@/components/CareSplitLogo";
-import { ArrowLeft, User, Mail, Phone, Lock } from "lucide-react";
+import { ArrowLeft, User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import authImage from "@/assets/auth-nurse.jpg";
-
-const socialProviders = [
-  { name: "Facebook", color: "bg-[hsl(220,46%,48%)]", letter: "f", textColor: "text-white" },
-  { name: "Google", color: "bg-white", letter: "G", textColor: "text-foreground", border: true },
-  { name: "LinkedIn", color: "bg-[hsl(210,80%,42%)]", letter: "in", textColor: "text-white" },
-  { name: "Apple", color: "bg-foreground", letter: "🍎", textColor: "text-primary-foreground" },
-];
 
 const Signup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { login, loading: authLoading } = useAuth();
+
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirm: "" });
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,25 +49,21 @@ const Signup = () => {
     }
   };
 
-  const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm((prev) => ({ ...prev, [field]: e.target.value }));
-
   return (
-    <div className="min-h-screen w-full flex flex-col md:flex-row overflow-hidden">
-      {/* Left: Image */}
-      <div className="hidden md:flex flex-1 items-center justify-center bg-card">
+    <div className="min-h-screen w-full flex flex-col md:flex-row">
+      {/* Left: Image — fills the entire left half, no border */}
+      <div className="hidden md:block md:w-1/2 relative">
         <img
           src={authImage}
           alt="Healthcare professional"
-          className="w-full h-full object-cover max-h-screen"
-          style={{ minHeight: '100vh' }}
+          className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
         />
       </div>
-      {/* Right: Form */}
-      <div className="flex-1 flex items-center justify-center p-6 md:p-16 bg-background min-h-screen">
-        <div className="w-full max-w-md">
-          <Link to="/" className="text-muted-foreground hover:text-foreground mb-8 w-fit inline-block">
+      {/* Right: Form — scrollable */}
+      <div className="w-full md:w-1/2 flex items-start md:items-center justify-center p-6 md:p-12 lg:p-16 bg-background min-h-screen overflow-y-auto">
+        <div className="w-full max-w-md py-6">
+          <Link to="/auth-choice" className="text-muted-foreground hover:text-foreground mb-8 w-fit inline-block">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <CareSplitLogo size="sm" />
@@ -101,14 +96,20 @@ const Signup = () => {
               <Label className="font-semibold">Password</Label>
               <div className="relative mt-1.5">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input type="password" placeholder="Create a strong password" className="pl-10" value={form.password} onChange={update("password")} />
+                <Input type={showPassword ? "text" : "password"} placeholder="Create a strong password" className="pl-10 pr-10" value={form.password} onChange={update("password")} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
             <div>
               <Label className="font-semibold">Confirm Password</Label>
               <div className="relative mt-1.5">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input type="password" placeholder="Re-enter your password" className="pl-10" value={form.confirm} onChange={update("confirm")} />
+                <Input type={showConfirm ? "text" : "password"} placeholder="Re-enter your password" className="pl-10 pr-10" value={form.confirm} onChange={update("confirm")} />
+                <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
 
@@ -116,31 +117,9 @@ const Signup = () => {
               {loading || authLoading ? "Creating Account..." : "Create Account"}
             </Button>
 
-            <div className="text-center text-sm text-muted-foreground font-semibold">OR</div>
-
-            <div className="relative flex items-center justify-center">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border" />
-              </div>
-              <span className="relative bg-background px-4 text-xs text-muted-foreground">Sign Up with</span>
-            </div>
-
-            <div className="flex justify-center gap-4 pt-2">
-              {socialProviders.map((p) => (
-                <button
-                  key={p.name}
-                  type="button"
-                  className={`w-14 h-14 rounded-xl ${p.color} ${p.textColor} ${p.border ? "border border-border" : ""} flex items-center justify-center hover:opacity-90 transition-opacity text-lg font-bold shadow-sm`}
-                  aria-label={`Sign up with ${p.name}`}
-                  onClick={() => { toast({ title: `${p.name} sign up coming soon` }); }}
-                >
-                  {p.letter}
-                </button>
-              ))}
-            </div>
-
             <p className="text-center text-sm text-muted-foreground mt-4">
-              Already have an account? <Link to="/login" className="text-primary font-semibold hover:underline">Sign In</Link>
+              Already have an account?{" "}
+              <Link to="/login" className="text-primary font-semibold hover:underline">Sign In</Link>
             </p>
           </form>
         </div>

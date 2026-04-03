@@ -24,30 +24,14 @@ const ProviderLogin = () => {
       return;
     }
     setLoading(true);
-    setTimeout(async () => {
-      // Fetch users from mock API and match by email
-      let user: any = null;
-      try {
-        const res = await fetch('/api/users');
-        const users = await res.json();
-        const matched = users.find((u: any) => u.email === email);
-        if (matched) {
-          user = {
-            _id: matched._id,
-            name: matched.name,
-            email: matched.email,
-            role: "provider",
-          };
-        }
-      } catch {}
-      if (!user) {
-        user = {
-          _id: "demo-provider-1",
-          name: email.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()),
-          email,
-          role: "provider",
-        };
-      }
+    setTimeout(() => {
+      // Simulate provider user data; in real app, fetch from API
+      const user = {
+        _id: "demo-provider-1",
+        name: "Dr. Sarah Mitchell",
+        email,
+        role: "provider",
+      };
       login({ ...user, role: user.role as "provider" | "patient" });
       toast({ title: "Welcome back!" });
       navigate("/provider/dashboard");
